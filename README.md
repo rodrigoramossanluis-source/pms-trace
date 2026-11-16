@@ -1,0 +1,165 @@
+# pms_trace
+
+A Bash investigator for hotel reservations that travel **channel (OTA) -> channel manager -> PMS**.
+Give it a booking reference and a rough time. It searches the logs of each hop, harvests join keys
+(trace tokens, reservation UUIDs, PMS ids), follows them across the chain and writes a verdict on
+where the booking stopped and why.
+
+It is driven by an external, **self-updating knowledge base** (`connector_kb.json`). Every run makes
+the next run faster.
+
+```
+ARRIVAL -> INVENTORY -> ACCEPTANCE -> CM_STORE -> PMS_RECEIVE -> CONVERSION -> DELIVERY
+```
+
+## What it does
+
+| Stage | What happens |
+|---|---|
+| Resolve | Channel system from the KB module. If the module is thin: `cm-<prefix>` convention (verified against the live catalog), then catalog name-match as a last resort. |
+| Sweep | Cost-ordered: KB apps first, then catalog-only apps, then system-wide `*` last. Hour fan-out around the given time, full-day and +/-1 day drift as fallbacks. |
+| Anchor | Locks the real arrival hour from the evidence. Downstream scans use anchor +/-1h. |
+| Harvest / follow | Extracts join keys and re-scans each hop with them. Low-selectivity keys (room/rate/hotel codes) are context-only, so other reservations are never counted as evidence. |
+| Verdict | Lit / missing / failed / N/A gate per stage. `faultCode` is matched against KB `failure_signatures` (meaning, fix path, terminal flag). Writes `REPORT.md`, `verdict.json`, `NEXT_ACTIONS.md`. |
+| Write-back | Records the run in the KB and caches the apps that produced evidence (see below). |
+
+Extra modes (`PT_TASKS` / `PT_GOAL`): `fidelity` (field-level diff OTA vs PMS payload), `ari`
+(rate/availability attribution), `guiattrib` (who changed it in the GUI), `bridge-flush`,
+`kb-test`. Only `trace` is covered by the bundled fixture test. The other modes are syntax-checked
+but not fixture-tested yet.
+
+## Knowledge base: load and write-back
+
+The KB is **not embedded** in the script. It lives in `~/pms_tools/kb/connector_kb.json`
+(`PT_KB_DIR` / `PT_KB_FILE`).
+
+**On startup**
+1. Loads the live file. Write-back updates it in place, so it is always the newest version.
+2. If the live file is missing, the newest `connector_kb*.json` in the folder (never a `.bak`) is promoted.
+3. If the live file is not valid JSON, it is kept as `.corrupt.<ts>` and the newest *valid* `.bak` is restored.
+4. If you deploy a versioned release (`connector_kb_v0.9.12.json`) that is newer than the live file, it is
+   promoted: the old live file becomes `.bak.<ts>.promote`, the new structure wins, and learned data
+   (history, apps the new file leaves empty, modules only the live KB knows) is carried over.
+
+**On every live run (hits or zero hits)**
+1. Takes an exclusive lock (`fcntl`, works on Linux and macOS). Concurrent detached runs do not lose updates.
+2. Re-reads the live KB and writes `connector_kb.json.bak.<UTC-ts>.<pid>`.
+3. Merges:
+   - a `history` entry: case, ref, confirmed apps, winning patterns, signatures, key kinds;
+   - newly discovered **channel-system** apps into `channels.<CODE>.log_apps`;
+   - **PMS-side** apps into `pms.<CODE>.delivery_apps`;
+   - stub modules for unknown channels;
+   - stale-app repairs, but only against a verified catalog listing.
+4. Writes to a temp file and renames it atomically.
+5. Retention: `PT_KB_BAK_KEEP` (default 20) backups, and `PT_KB_HISTORY_KEEP` (default 50) history entries per module.
+
+Write-back is skipped only in `PT_MODE=plan` (dry run) or when the KB file is not writable.
+Structural KB changes (new sections or keys) are the only edits you should make by hand.
+
+## Requirements
+
+- bash >= 4 (macOS: `brew install bash`)
+- python3 >= 3.8
+- GNU coreutils (`date -d`, `timeout`). macOS: `brew install coreutils`. The g-prefixed tools are shimmed by the test.
+- Access to your logs: a local folder, an SSH host, or an S3 bucket (see below).
+
+## Log backend (`backends/`)
+
+`pms_trace.sh` never reads logs directly. Every search goes through two small CLIs that only
+**structure** the search: system + component + hour -> files -> matching lines. They don't index,
+cache or modify anything. Working reference versions ship in `backends/`:
+
+| Command | Purpose |
+|---|---|
+| `s3search.py ls <sys> <comp>` | List apps (`<sys>/<comp>`, globs allowed). This is the catalog used for discovery. |
+| `s3search.py grep <sys> <comp> <blob> <literal>` | Raw lines containing a literal. `blob` = `YYYY-MM-DD-HH` or `YYYY-MM-DD-*`. |
+| `s3search.py query <sys> <comp> <blob> '<expr>'` | JSON-field filter: `s.flowToken = "x" AND s.message LIKE "%y%"`. |
+| `s3grep.py find <literal> <bucket-glob> <YYYY-MM-DD>` | Optional secondary / legacy archive. |
+
+Exit code 0 = hits, 1 = no match, 2 = error. `.gz` files are decompressed transparently.
+
+**Where the logs are** (`S3S_ROOT`; the legacy archive uses `S3G_ROOT` with the same schemes):
+
+| `S3S_ROOT` | Transport | Needs |
+|---|---|---|
+| `/var/log/archive` or `file:///...` | local folder (or a mounted share) | nothing |
+| `ssh://user@host/var/log/archive` | one `ssh -n` call per search; `grep` runs **on the remote host**, so only matching lines travel | key-based SSH (`~/.ssh/config` works); POSIX `sh`, `grep`, `gzip`, `awk` on the host |
+| `s3://bucket/prefix` | AWS CLI v2; objects are streamed and filtered locally | `aws` configured (`AWS_PROFILE`, `AWS_REGION`) with `s3:ListBucket` and `s3:GetObject` permissions |
+
+**How the files are laid out** (`S3S_LAYOUT`, which must start with `{sys}/{comp}/`):
+
+```
+default   {sys}/{comp}/{date}-{hour}*         cm-ota2/booking-gateway/2026-01-10-12.log.gz
+dated     {sys}/{comp}/{yyyy}/{mm}/{dd}/{hour}/*
+```
+
+`S3S_SSH_OPTS` adds ssh options (default `-o BatchMode=yes -o ConnectTimeout=15`).
+`S3S_CALL_LOG` writes an audit line for every call.
+
+**How the tool finds the backend:** `PT_SEARCH_CMD` / `PT_GREP_CMD`, then `PATH`, then `backends/`
+next to the script, then `~/pms_tools/backends/`. If you already have your own search scripts with the
+same contract, put them on `PATH` (or point the two variables at them) and nothing else changes.
+
+## Quick start
+
+```bash
+git clone https://github.com/<you>/pms-trace && cd pms-trace
+mkdir -p ~/pms_tools/kb && cp connector_kb.json ~/pms_tools/kb/
+export S3S_ROOT=ssh://ops@loghost/var/log/archive      # or a local path, or s3://bucket/prefix
+PT_CASE=case-001 PT_REF=OTA2-1000000001 PT_CHANNEL=OTA2 PT_PMS=CLOUDPMS \
+PT_AT=2026-01-10T12:00:00 PT_DETACH=0 bash pms_trace.sh
+# results: ~/pms_tools/runs/case-001/{REPORT.md,verdict.json,NEXT_ACTIONS.md,join_keys.tsv,ledger.tsv,raw/}
+```
+
+By default the run detaches, so it survives SSH drops. Re-running resumes from finished stages.
+You can also run the whole tool *on* the log host (copy the repo there and use a local `S3S_ROOT`).
+
+## Test
+
+```bash
+bash ./run_mock_test.sh                              # Linux
+cd ~/pms-trace && /opt/homebrew/bin/bash ./run_mock_test.sh   # macOS (Intel: /usr/local/bin/bash)
+```
+
+No network access is needed. It builds a fixture log archive and runs the **real** backends and the real tool against it:
+
+1. Delivered booking: all five gates lit, keys harvested, other reservations at the property excluded, KB write-back checked.
+2. Re-run from the written-back KB.
+3. **Discovery:** the channel module is empty, the system is found from the catalog, and the KB learns the apps.
+4. **Re-learn:** starts from the learned KB and needs fewer backend calls (64 vs 88 in the fixture).
+5. Conversion failure: the terminal signature is recognised and DELIVERY is marked N/A.
+6. Backend contract: `ls`/`grep`/`query`, `.gz` files, globs, no-match and error exit codes, input validation.
+7. Full trace over `ssh://` and over `s3://` (through local `ssh`/`aws` stand-ins), with results checked against the local run.
+
+Exit 0 = PASS (43 checks across the 7 scenarios), exit 1 = a check failed.
+
+Run it with no options in a terminal and it asks three y/N questions. Flags (or env vars) skip the
+questions; anything unset defaults to off when there is no terminal (CI, pipes):
+
+| Flag | Env | Effect |
+|---|---|---|
+| `-s`, `--save [FILE]` | `SAVE=1`, `SAVE_PATH=FILE` | Save the full console output. Default `./test-reports/FULL_TEST_REPORT_<UTC>.txt` in the folder you run from. Local paths are redacted (`<sandbox>`, `<repo>`, `~`), so the file is safe to share. |
+| `-v`, `--verbose` | `VERBOSE=1` | Per scenario: system resolution, every backend call, harvested keys, `verdict.json`, `REPORT.md`, `NEXT_ACTIONS.md`. |
+| `-k`, `--keep` | `KEEP=1` | Keep the throw-away sandbox (raw run folders) for inspection. |
+| `-y`, `--no-prompt` | | Never ask. |
+
+```bash
+bash ./run_mock_test.sh --save --verbose      # full evidence report in ./test-reports/
+```
+
+A complete verbose run is included as [docs/sample-test-report.txt](docs/sample-test-report.txt).
+
+## Adapting to your estate
+
+All names in this repository (`cm-ota2`, `pms-hub`, `OTA1..4`, `CLOUDPMS`, ...) are **generic
+placeholders**. Map them to your systems in `connector_kb.json`. Gate regexes live in `pt_verdict`.
+
+## Privacy warning
+
+A KB that has been used on live data accumulates real booking refs and case ids in its `history`
+arrays. So does everything under `runs/`. **Never commit them.** `.gitignore` covers runs and backups.
+Before contributing KB changes upstream, empty the `history` arrays and replace real identifiers.
+
+## License
+
+MIT - see [LICENSE](LICENSE).
