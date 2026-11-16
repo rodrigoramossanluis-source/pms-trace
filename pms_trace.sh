@@ -27,8 +27,11 @@
 #     hubBookingUuid, pmsBookingId, echoToken) and each key is re-scanned
 #     across the chain (channel -> hub-channel-store -> pms-hub). The pms-hub
 #     leg is found by keys, not by luck.
-#   - VERDICT SYNTHESIZER: stage gates ARRIVAL -> ACCEPTANCE -> CM_STORE ->
-#     PMS_RECEIVE -> CONVERSION -> DELIVERY are classified from the raw hits;
+#   - VERDICT SYNTHESIZER: stage gates ARRIVAL -> INVENTORY -> ACCEPTANCE ->
+#     CM_STORE -> PMS_RECEIVE -> CONVERSION -> DELIVERY are classified from the
+#     raw hits (each gate independently; the order is report order, not an
+#     enforced sequence). CONVERSION lights only on a conversion FAULT;
+#     INVENTORY is N/A for channels whose KB module lists it in skip_gates;
 #     faultCode is matched against KB failure_signatures (meaning + fix
 #     path); every stage without hits gets an elimination ledger line
 #     (ELIMINATED vs UNVERIFIED), never a bare "absent".

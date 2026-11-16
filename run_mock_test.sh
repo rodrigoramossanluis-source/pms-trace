@@ -23,6 +23,7 @@
 #   kb-test   : every KB module vs the catalog (LIVE / STALE?)
 #   bridgeflush: goal bridge-flush - sub-leg isolation, culprit room rate derived
 #   contracts : goal input contract refusal (exit 2, zero scans), unknown task name
+#               (named with the valid list; the remaining tasks still run)
 #
 # OPTIONS (flags or env vars; with no flag/env set you are asked at the console):
 #   -s, --save [FILE]  save the full console output to FILE (default: ./test-reports/
@@ -43,7 +44,7 @@ while [ $# -gt 0 ]; do
     -v|--verbose) VERBOSE=1 ;;
     -k|--keep)    KEEP=1 ;;
     -y|--no-prompt) NO_PROMPT=1 ;;
-    -h|--help)    sed -n '2,35p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help)    sed -n '2,36p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option: $1 (try --help)"; exit 2 ;;
   esac; shift
 done
@@ -561,8 +562,10 @@ check "actor + origin captured"                            "'user=ops.lead@demo-
 case_end
 
 # ---- unknown task name: reported, not silently ignored ---------------------------------
-run_mode unknown-task bogus
-check "unknown task named in the output"                   "\"unknown task 'bogus'\" in log and rc == 0"
+# PT_TASKS is operator-typed free text; a typo must be named, and the valid tasks still run.
+run_mode unknown-task "not-a-real-task kb-test"
+check "unknown task named with the valid list"             "\"unknown task 'not-a-real-task' (trace|fidelity|kb-test|ari|guiattrib|bridgeflush)\" in log"
+check "remaining valid task still ran, exit 0"             "'[kb-test] LIVE  cm-ota2/booking-gateway' in log and rc == 0"
 case_end
 
 echo

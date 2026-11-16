@@ -28,6 +28,57 @@ Extra modes (`PT_TASKS` / `PT_GOAL`): `fidelity` (field-level diff OTA vs PMS pa
 `kb-test`. Every mode is exercised by the bundled fixture test (see [Test](#test)); the fixtures are
 synthetic, so real-estate behaviour still depends on your log formats and KB.
 
+### Task selection (`PT_TASKS`)
+
+`PT_TASKS` is a space-separated list typed by the operator (default `trace`). Tasks run in the order
+given. Valid names: `trace`, `fidelity`, `ari`, `guiattrib`, `kb-test`, `bridgeflush`.
+`PT_GOAL=<playbook>` selects the tasks for you and refuses with exit 2, before any backend call, if
+the playbook's required inputs are missing:
+
+| `PT_GOAL` | Tasks |
+|---|---|
+| `missing-reservation` | `trace` |
+| `delivery-failure` | `trace fidelity` |
+| `rate-mismatch`, `overbooking`, `billing-trace` | `ari` |
+| `bridge-flush` | `bridgeflush` |
+| blank / `custom` | `PT_TASKS` as typed |
+
+An unrecognised `PT_GOAL` is named in the output (`[goal] unknown PT_GOAL=...`) and the run falls
+back to `PT_TASKS` as typed.
+
+A name that is not in the list (usually a typo, e.g. `fidelty`) is **not silently dropped**: the run
+prints `[tasks] unknown task 'fidelty' (trace|fidelity|kb-test|ari|guiattrib|bridgeflush)`, skips
+it, still runs the remaining valid tasks, and exits 0. Check the console for that line if a mode's
+output is missing. (`PT_GOAL` input contracts are strict; the free-text task list is lenient.)
+
+### Stage gates (booking path)
+
+```
+ARRIVAL -> INVENTORY -> ACCEPTANCE -> CM_STORE -> PMS_RECEIVE -> CONVERSION -> DELIVERY
+```
+
+Each gate is classified **independently** from the collected evidence lines; the arrow is report
+order, not an enforced sequence. The patterns live in `GATES` inside `pt_verdict` and are meant to
+be adapted to your log vocabulary.
+
+| Gate | Lit when an evidence line shows | Notes |
+|---|---|---|
+| ARRIVAL | booking request / reservation create from the channel | |
+| INVENTORY | availability / sellable / inventory check | N/A for channels whose KB module lists it in `skip_gates` (push channels that deliver without an availability step in the booking path) |
+| ACCEPTANCE | the channel manager's 200/202 acceptance | |
+| CM_STORE | the channel-manager store (`hub-channel-store`, `cmBookingId`) | |
+| PMS_RECEIVE | the PMS hub picked the booking up (`pms-hub`, `booking-events`) | |
+| CONVERSION | a conversion **fault** (`faultCode`, `ERR_CONVERSION`, `"status":"Error"`) | Inverted: unlit is the healthy case. An `ERR_CONVERSION*` code marks the gate FAILED and is matched against KB `failure_signatures`; if the signature is terminal, later gates with no hits are N/A |
+| DELIVERY | PMS-side success (`Success`, `Delivered`, `sent to pms`) | Marked FAILED (never lit as success) whenever a failure code binds to the booking |
+
+The ordering models a pull-style channel (availability checked before the channel manager accepts)
+and a PMS-side converter (conversion after the PMS hub receives). Estates where inventory is
+decremented after storage, or where the CM converts before pushing, still classify correctly
+because gates are independent; only the checklist order in `REPORT.md` differs. The "broken chain"
+hint in `NEXT_ACTIONS.md` names the first unlit gate among ARRIVAL, ACCEPTANCE, CM_STORE,
+PMS_RECEIVE. The reverse direction (PMS -> CM -> channel rates and availability) is the `ari` task,
+with its own gates (SOURCE, INGEST, CM_PERSIST, CHANNEL_PUSH, OTA_ACK).
+
 ## Knowledge base: load and write-back
 
 The KB is **not embedded** in the script. It lives in `~/pms_tools/kb/connector_kb.json`
@@ -146,9 +197,9 @@ and the real tool against it, one scenario per behaviour, and asserts on the fil
 | guiattrib | `guiattrib` | link-api burst -> flowToken -> actor email + client IP, mutation, session read, entity-api audit write in GUIACTORS.md. |
 | kb-test | `kb-test` | Every KB module reported; fixture apps LIVE, absent apps STALE?; failure signatures counted. |
 | bridgeflush | `bridgeflush` via `PT_GOAL=bridge-flush` | Flush trigger hour found, failing sub-leg isolated, culprit room rate derived, token chain, all 8 gates, fail-fast single-blocker, actor + origin. |
-| unknown-task | `PT_TASKS=bogus` | Unknown task is named in the output. |
+| unknown-task | `PT_TASKS="not-a-real-task kb-test"` | The invalid name is reported with the valid list, the valid task still runs, exit 0. |
 
-Exit 0 = PASS (95 checks across 18 scenarios), exit 1 = a check failed. A pass proves the logic
+Exit 0 = PASS (96 checks across 18 scenarios), exit 1 = a check failed. A pass proves the logic
 against these fixtures; it is not evidence about your own logs until you run the tool on them.
 
 Run it with no options in a terminal and it asks three y/N questions. Flags (or env vars) skip the
