@@ -24,9 +24,9 @@ ARRIVAL -> INVENTORY -> ACCEPTANCE -> CM_STORE -> PMS_RECEIVE -> CONVERSION -> D
 | Write-back | Records the run in the KB and caches the apps that produced evidence (see below). |
 
 Extra modes (`PT_TASKS` / `PT_GOAL`): `fidelity` (field-level diff OTA vs PMS payload), `ari`
-(rate/availability attribution), `guiattrib` (who changed it in the GUI), `bridge-flush`,
-`kb-test`. Only `trace` is covered by the bundled fixture test. The other modes are syntax-checked
-but not fixture-tested yet.
+(rate/availability attribution), `guiattrib` (who changed it in the GUI), `bridgeflush` (goal `bridge-flush`),
+`kb-test`. Every mode is exercised by the bundled fixture test (see [Test](#test)); the fixtures are
+synthetic, so real-estate behaviour still depends on your log formats and KB.
 
 ## Knowledge base: load and write-back
 
@@ -121,17 +121,35 @@ bash ./run_mock_test.sh                              # Linux
 cd ~/pms-trace && /opt/homebrew/bin/bash ./run_mock_test.sh   # macOS (Intel: /usr/local/bin/bash)
 ```
 
-No network access is needed. It builds a fixture log archive and runs the **real** backends and the real tool against it:
+No network access is needed. It builds a synthetic fixture log archive and runs the **real** backends
+and the real tool against it, one scenario per behaviour, and asserts on the files each mode writes.
 
+**trace** (booking delivery path)
 1. Delivered booking: all five gates lit, keys harvested, other reservations at the property excluded, KB write-back checked.
-2. Re-run from the written-back KB.
+2. Re-run from the written-back KB: same gates, KB converged (no new apps learned).
 3. **Discovery:** the channel module is empty, the system is found from the catalog, and the KB learns the apps.
-4. **Re-learn:** starts from the learned KB and needs fewer backend calls (64 vs 88 in the fixture).
-5. Conversion failure: the terminal signature is recognised and DELIVERY is marked N/A.
+4. **Re-learn:** starts from the learned KB and needs fewer backend calls (76 vs 100 in the fixture).
+5. Conversion failure: the terminal signature is recognised and DELIVERY is not reported as success.
 6. Backend contract: `ls`/`grep`/`query`, `.gz` files, globs, no-match and error exit codes, input validation.
 7. Full trace over `ssh://` and over `s3://` (through local `ssh`/`aws` stand-ins), with results checked against the local run.
 
-Exit 0 = PASS (43 checks across the 7 scenarios), exit 1 = a check failed.
+**Other modes**
+
+| Scenario | Mode / goal | What is asserted |
+|---|---|---|
+| fidelity-files | `fidelity` | Offline OTA + PMS documents: all seven field rows PRESERVED, no verdicts. |
+| fidelity-nodocs | `fidelity` | No documents and nothing to fetch: says "docs unavailable", writes no report. |
+| trace-fidelity | `trace fidelity` | echoToken / hubBookingUuid harvested by trace, both documents auto-fetched, verdicts CONFIG_IGNORED, TAX_BREAKDOWN_DROPPED, FIELD_DROPPED. |
+| ari-manual | `ari` via `PT_GOAL=rate-mismatch` | Backward sweep stops at the target hour, SET line = TARGET_EVENT, actor email resolved through gui-gateway, gates SOURCE/CM_PERSIST/CHANNEL_PUSH/OTA_ACK, INGEST N/A, GOAL_VERDICT = VALUE_ATTRIBUTED, push app written back to the KB. |
+| ari-pms | `ari` | PMS-push origin: SET found in region rb after ra is empty, bridge ingest leg auto-selected, CHANNEL_PUSH reported missing (no channel given). |
+| goal-contract | `PT_GOAL=overbooking` | Missing anchors: refuses with exit 2, lists them, makes zero backend calls. |
+| guiattrib | `guiattrib` | link-api burst -> flowToken -> actor email + client IP, mutation, session read, entity-api audit write in GUIACTORS.md. |
+| kb-test | `kb-test` | Every KB module reported; fixture apps LIVE, absent apps STALE?; failure signatures counted. |
+| bridgeflush | `bridgeflush` via `PT_GOAL=bridge-flush` | Flush trigger hour found, failing sub-leg isolated, culprit room rate derived, token chain, all 8 gates, fail-fast single-blocker, actor + origin. |
+| unknown-task | `PT_TASKS=bogus` | Unknown task is named in the output. |
+
+Exit 0 = PASS (95 checks across 18 scenarios), exit 1 = a check failed. A pass proves the logic
+against these fixtures; it is not evidence about your own logs until you run the tool on them.
 
 Run it with no options in a terminal and it asks three y/N questions. Flags (or env vars) skip the
 questions; anything unset defaults to off when there is no terminal (CI, pipes):
@@ -139,7 +157,7 @@ questions; anything unset defaults to off when there is no terminal (CI, pipes):
 | Flag | Env | Effect |
 |---|---|---|
 | `-s`, `--save [FILE]` | `SAVE=1`, `SAVE_PATH=FILE` | Save the full console output. Default `./test-reports/FULL_TEST_REPORT_<UTC>.txt` in the folder you run from. Local paths are redacted (`<sandbox>`, `<repo>`, `~`), so the file is safe to share. |
-| `-v`, `--verbose` | `VERBOSE=1` | Per scenario: system resolution, every backend call, harvested keys, `verdict.json`, `REPORT.md`, `NEXT_ACTIONS.md`. |
+| `-v`, `--verbose` | `VERBOSE=1` | Per scenario: every backend call plus the files the mode wrote (system resolution, harvested keys, `verdict.json`, `REPORT.md`, `NEXT_ACTIONS.md`, `fidelity_report.txt`, `ari_evidence.tsv`, `GUIACTORS.md`, `GOAL_VERDICT.md`, bridge-flush analysis). |
 | `-k`, `--keep` | `KEEP=1` | Keep the throw-away sandbox (raw run folders) for inspection. |
 | `-y`, `--no-prompt` | | Never ask. |
 

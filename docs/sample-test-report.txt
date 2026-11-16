@@ -3,12 +3,13 @@
 == backends: <repo>/backends
 
 ================ scenario: delivered  (ref=OTA2-1000000001 at=2026-01-10T12:00:00) ================
-trace exit=0  backend calls=88  kb-write: [kb-write] updated (channels.OTA2 +0 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
+trace exit=0  backend calls=94  kb-write: [kb-write] updated (channels.OTA2 +1 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
 ==================== VERBOSE FUNCTION REPORT ====================
 --- [Function: System & App Resolution (resolve.tsv)] ---
 sys_from_kb_apps|OTA2|cm-ota2
 kb_module|OTA2|sys=cm-ota2|apps=cm-ota2/booking-gateway cm-ota2/avail-gateway cm-ota2/booking-processor cm-ota2/booking-job cm-ota2/avail-api cm-ota2/property-api
-pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/property-api
+pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/notify-gateway,cm-ota2/property-api
+catalog_only|OTA2|cm-ota2/notify-gateway|in live pool, not in KB
 --- [Function: Backend Search & Grep Calls (mock_calls.log)] ---
 ls cm-ota2 *
 grep cm-ota2 booking-gateway 2026-01-10-11 OTA2-1000000001
@@ -89,6 +90,12 @@ grep pms-hub booking-api 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-11 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-12 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
+grep cm-ota2 notify-gateway 2026-01-10-11 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-12 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-13 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-11 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-12 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-13 ECHO-7f3a9c21
 grep pms-hub booking-api 2026-01-10-11 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
@@ -100,6 +107,7 @@ grep hub-channel-store booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456
 grep hub-channel-store booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
 --- [Function: Join Key Harvester (join_keys.tsv)] ---
 flowToken	0a1b2c3d-1111-4222-8333-944455556666	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
+echoToken	ECHO-7f3a9c21	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 sourceAgentCode	OTA2	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 roomCode	DBL	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 ratePlanCode	BAR	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
@@ -127,7 +135,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
     "failure_codes": {},
     "email_silence": false,
     "terminal": null,
-    "hits": 6,
+    "hits": 8,
     "context_files": 0
 }
 --- [Function: Main Trace Report Generator (REPORT.md)] ---
@@ -136,13 +144,13 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - patterns: OTA2-1000000001 1000000001  (uppercase rule: CM booking IDs are stored UPPERCASE; lowercase variants dropped - verified 2026-10-28)
 - time anchor: **2026-01-10-12** locked from live data (typed AT=2026-01-10T12:00:00, drift 0h; tz_offset=-6 informational) - downstream scans = anchor +/-1h
 - channel cross-check: sourceAgentCode=OTA2  matches resolved channel OTA2 - diagnosis confirmed
-[02:30:31] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
-[02:30:31] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
-[02:30:31] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
-[02:30:31] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
-[02:30:31] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
+[04:01:31] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
+[04:01:31] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
+[04:01:31] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
+[04:01:31] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
+[04:01:31] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
 
-## VERDICT (synthesized 2026-11-16T02:30:32Z)
+## VERDICT (synthesized 2026-11-16T04:01:31Z)
 
 - [x] **ARRIVAL** - 2 hit(s)
 - [ ] INVENTORY - no hits in evidence
@@ -154,7 +162,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 
 
 ### Elimination ledger (why an empty stage is believed)
-- coverage: 91 stage(s) run, 78 empty, 13 with hits; preflight: n/a
+- coverage: 97 stage(s) run, 83 empty, 14 with hits; preflight: n/a
 - **INVENTORY empty**: inventory state only visible via listing_id follow scans; none of the harvested keys produced an inventory hit
 - **CONVERSION empty**: no faultCode/status=Error observed in any evidence hit
 
@@ -164,9 +172,10 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_1000000001 (1 lines)
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_OTA2-1000000001 (1 lines)
 - HIT: f_cm-ota2_booking-processor_2026-01-10-12_0a1b2c3d-1111 (1 lines)
+- HIT: f_cm-ota2_notify-gateway_2026-01-10-12_ECHO-7f3a9c21 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
-- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
+- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (2 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_9c8b7a65-4321 (1 lines)
 - ledger: <sandbox>/home_delivered/pms_tools/runs/mock-delivered/ledger.tsv  keys: <sandbox>/home_delivered/pms_tools/runs/mock-delivered/join_keys.tsv  raw: <sandbox>/home_delivered/pms_tools/runs/mock-delivered/raw/
@@ -180,8 +189,8 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
   terminal: None
   failure_codes: {}
   na      : []
-  join keys (8): flowToken=0a1b2c3d-1111-4222-8333-944455556666, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
-  evidence files with hits: 11 (follow-up hits: 6)
+  join keys (9): flowToken=0a1b2c3d-1111-4222-8333-944455556666, echoToken=ECHO-7f3a9c21, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
+  evidence files with hits: 12 (follow-up hits: 7)
   [PASS] verdict.json written
   [PASS] gates ARRIVAL,ACCEPTANCE,CM_STORE,PMS_RECEIVE,DELIVERY lit
   [PASS] CONVERSION not lit (no failure)
@@ -196,12 +205,12 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
   [PASS] KB write-back: KB-declared apps kept (no false stale repair)
 
 ================ scenario: rerun  (ref=OTA2-1000000001 at=2026-01-10T12:00:00) ================
-trace exit=0  backend calls=88  kb-write: [kb-write] updated (channels.OTA2 +0 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
+trace exit=0  backend calls=100  kb-write: [kb-write] updated (channels.OTA2 +0 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
 ==================== VERBOSE FUNCTION REPORT ====================
 --- [Function: System & App Resolution (resolve.tsv)] ---
 sys_from_kb_apps|OTA2|cm-ota2
-kb_module|OTA2|sys=cm-ota2|apps=cm-ota2/booking-gateway cm-ota2/avail-gateway cm-ota2/booking-processor cm-ota2/booking-job cm-ota2/avail-api cm-ota2/property-api
-pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/property-api
+kb_module|OTA2|sys=cm-ota2|apps=cm-ota2/booking-gateway cm-ota2/avail-gateway cm-ota2/booking-processor cm-ota2/booking-job cm-ota2/avail-api cm-ota2/property-api cm-ota2/notify-gateway
+pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/notify-gateway,cm-ota2/property-api
 --- [Function: Backend Search & Grep Calls (mock_calls.log)] ---
 ls cm-ota2 *
 grep cm-ota2 booking-gateway 2026-01-10-11 OTA2-1000000001
@@ -240,6 +249,12 @@ grep cm-ota2 property-api 2026-01-10-13 OTA2-1000000001
 grep cm-ota2 property-api 2026-01-10-11 1000000001
 grep cm-ota2 property-api 2026-01-10-12 1000000001
 grep cm-ota2 property-api 2026-01-10-13 1000000001
+grep cm-ota2 notify-gateway 2026-01-10-11 OTA2-1000000001
+grep cm-ota2 notify-gateway 2026-01-10-12 OTA2-1000000001
+grep cm-ota2 notify-gateway 2026-01-10-13 OTA2-1000000001
+grep cm-ota2 notify-gateway 2026-01-10-11 1000000001
+grep cm-ota2 notify-gateway 2026-01-10-12 1000000001
+grep cm-ota2 notify-gateway 2026-01-10-13 1000000001
 grep pms-hub booking-api 2026-01-10-11 OTA2-1000000001
 grep pms-hub booking-api 2026-01-10-12 OTA2-1000000001
 grep pms-hub booking-api 2026-01-10-13 OTA2-1000000001
@@ -282,6 +297,12 @@ grep pms-hub booking-api 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-11 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-12 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
+grep cm-ota2 notify-gateway 2026-01-10-11 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-12 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-13 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-11 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-12 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-13 ECHO-7f3a9c21
 grep pms-hub booking-api 2026-01-10-11 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
@@ -293,6 +314,7 @@ grep hub-channel-store booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456
 grep hub-channel-store booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
 --- [Function: Join Key Harvester (join_keys.tsv)] ---
 flowToken	0a1b2c3d-1111-4222-8333-944455556666	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
+echoToken	ECHO-7f3a9c21	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 sourceAgentCode	OTA2	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 roomCode	DBL	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 ratePlanCode	BAR	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
@@ -320,7 +342,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
     "failure_codes": {},
     "email_silence": false,
     "terminal": null,
-    "hits": 6,
+    "hits": 8,
     "context_files": 0
 }
 --- [Function: Main Trace Report Generator (REPORT.md)] ---
@@ -329,13 +351,13 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - patterns: OTA2-1000000001 1000000001  (uppercase rule: CM booking IDs are stored UPPERCASE; lowercase variants dropped - verified 2026-10-28)
 - time anchor: **2026-01-10-12** locked from live data (typed AT=2026-01-10T12:00:00, drift 0h; tz_offset=-6 informational) - downstream scans = anchor +/-1h
 - channel cross-check: sourceAgentCode=OTA2  matches resolved channel OTA2 - diagnosis confirmed
-[02:30:38] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
-[02:30:38] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
-[02:30:38] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
-[02:30:39] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
-[02:30:39] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
+[04:01:39] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
+[04:01:39] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
+[04:01:39] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
+[04:01:40] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
+[04:01:40] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
 
-## VERDICT (synthesized 2026-11-16T02:30:39Z)
+## VERDICT (synthesized 2026-11-16T04:01:40Z)
 
 - [x] **ARRIVAL** - 2 hit(s)
 - [ ] INVENTORY - no hits in evidence
@@ -347,7 +369,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 
 
 ### Elimination ledger (why an empty stage is believed)
-- coverage: 91 stage(s) run, 78 empty, 13 with hits; preflight: n/a
+- coverage: 103 stage(s) run, 89 empty, 14 with hits; preflight: n/a
 - **INVENTORY empty**: inventory state only visible via listing_id follow scans; none of the harvested keys produced an inventory hit
 - **CONVERSION empty**: no faultCode/status=Error observed in any evidence hit
 
@@ -357,9 +379,10 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_1000000001 (1 lines)
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_OTA2-1000000001 (1 lines)
 - HIT: f_cm-ota2_booking-processor_2026-01-10-12_0a1b2c3d-1111 (1 lines)
+- HIT: f_cm-ota2_notify-gateway_2026-01-10-12_ECHO-7f3a9c21 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
-- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
+- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (2 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_9c8b7a65-4321 (1 lines)
 - ledger: <sandbox>/home_rerun/pms_tools/runs/mock-rerun/ledger.tsv  keys: <sandbox>/home_rerun/pms_tools/runs/mock-rerun/join_keys.tsv  raw: <sandbox>/home_rerun/pms_tools/runs/mock-rerun/raw/
@@ -373,24 +396,26 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
   terminal: None
   failure_codes: {}
   na      : []
-  join keys (8): flowToken=0a1b2c3d-1111-4222-8333-944455556666, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
-  evidence files with hits: 11 (follow-up hits: 6)
+  join keys (9): flowToken=0a1b2c3d-1111-4222-8333-944455556666, echoToken=ECHO-7f3a9c21, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
+  evidence files with hits: 12 (follow-up hits: 7)
   [PASS] same gates reached from the written-back KB
   [PASS] loaded the updated KB (history now has 2 runs)
-  [PASS] backend calls not higher than first session (88)
+  [PASS] KB converged: second session learned no new apps
+  note: backend calls 94 -> 100 (session 1 learned cm-ota2/notify-gateway from an echoToken follow-up hit; session 2 also scans it)
 
 ================ scenario: discover  (ref=OTA2-1000000001 at=2026-01-10T12:00:00) ================
-trace exit=0  backend calls=88  kb-write: [kb-write] updated (channels.OTA2 +1 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
+trace exit=0  backend calls=100  kb-write: [kb-write] updated (channels.OTA2 +2 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
 ==================== VERBOSE FUNCTION REPORT ====================
 --- [Function: System & App Resolution (resolve.tsv)] ---
 sys_from_convention|OTA2|cm-ota2
 kb_module|OTA2|sys=cm-ota2|apps=  
-pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/property-api
+pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/notify-gateway,cm-ota2/property-api
 catalog_only|OTA2|cm-ota2/avail-api|in live pool, not in KB
 catalog_only|OTA2|cm-ota2/avail-gateway|in live pool, not in KB
 catalog_only|OTA2|cm-ota2/booking-gateway|in live pool, not in KB
 catalog_only|OTA2|cm-ota2/booking-job|in live pool, not in KB
 catalog_only|OTA2|cm-ota2/booking-processor|in live pool, not in KB
+catalog_only|OTA2|cm-ota2/notify-gateway|in live pool, not in KB
 catalog_only|OTA2|cm-ota2/property-api|in live pool, not in KB
 --- [Function: Backend Search & Grep Calls (mock_calls.log)] ---
 ls cm-ota2 *
@@ -424,6 +449,12 @@ grep cm-ota2 booking-processor 2026-01-10-13 OTA2-1000000001
 grep cm-ota2 booking-processor 2026-01-10-11 1000000001
 grep cm-ota2 booking-processor 2026-01-10-12 1000000001
 grep cm-ota2 booking-processor 2026-01-10-13 1000000001
+grep cm-ota2 notify-gateway 2026-01-10-11 OTA2-1000000001
+grep cm-ota2 notify-gateway 2026-01-10-12 OTA2-1000000001
+grep cm-ota2 notify-gateway 2026-01-10-13 OTA2-1000000001
+grep cm-ota2 notify-gateway 2026-01-10-11 1000000001
+grep cm-ota2 notify-gateway 2026-01-10-12 1000000001
+grep cm-ota2 notify-gateway 2026-01-10-13 1000000001
 grep cm-ota2 property-api 2026-01-10-11 OTA2-1000000001
 grep cm-ota2 property-api 2026-01-10-12 OTA2-1000000001
 grep cm-ota2 property-api 2026-01-10-13 OTA2-1000000001
@@ -472,6 +503,12 @@ grep pms-hub booking-api 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-11 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-12 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
+grep cm-ota2 notify-gateway 2026-01-10-11 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-12 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-13 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-11 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-12 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-13 ECHO-7f3a9c21
 grep pms-hub booking-api 2026-01-10-11 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
@@ -483,6 +520,7 @@ grep hub-channel-store booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456
 grep hub-channel-store booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
 --- [Function: Join Key Harvester (join_keys.tsv)] ---
 flowToken	0a1b2c3d-1111-4222-8333-944455556666	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
+echoToken	ECHO-7f3a9c21	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 sourceAgentCode	OTA2	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 roomCode	DBL	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 ratePlanCode	BAR	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
@@ -510,7 +548,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
     "failure_codes": {},
     "email_silence": false,
     "terminal": null,
-    "hits": 6,
+    "hits": 8,
     "context_files": 0
 }
 --- [Function: Main Trace Report Generator (REPORT.md)] ---
@@ -519,13 +557,13 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - patterns: OTA2-1000000001 1000000001  (uppercase rule: CM booking IDs are stored UPPERCASE; lowercase variants dropped - verified 2026-10-28)
 - time anchor: **2026-01-10-12** locked from live data (typed AT=2026-01-10T12:00:00, drift 0h; tz_offset=-6 informational) - downstream scans = anchor +/-1h
 - channel cross-check: sourceAgentCode=OTA2  matches resolved channel OTA2 - diagnosis confirmed
-[02:30:45] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
-[02:30:45] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
-[02:30:45] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
-[02:30:45] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
-[02:30:45] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
+[04:01:47] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
+[04:01:47] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
+[04:01:47] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
+[04:01:48] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
+[04:01:48] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
 
-## VERDICT (synthesized 2026-11-16T02:30:46Z)
+## VERDICT (synthesized 2026-11-16T04:01:48Z)
 
 - [x] **ARRIVAL** - 2 hit(s)
 - [ ] INVENTORY - no hits in evidence
@@ -537,7 +575,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 
 
 ### Elimination ledger (why an empty stage is believed)
-- coverage: 91 stage(s) run, 78 empty, 13 with hits; preflight: n/a
+- coverage: 103 stage(s) run, 89 empty, 14 with hits; preflight: n/a
 - **INVENTORY empty**: inventory state only visible via listing_id follow scans; none of the harvested keys produced an inventory hit
 - **CONVERSION empty**: no faultCode/status=Error observed in any evidence hit
 
@@ -547,9 +585,10 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_1000000001 (1 lines)
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_OTA2-1000000001 (1 lines)
 - HIT: f_cm-ota2_booking-processor_2026-01-10-12_0a1b2c3d-1111 (1 lines)
+- HIT: f_cm-ota2_notify-gateway_2026-01-10-12_ECHO-7f3a9c21 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
-- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
+- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (2 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_9c8b7a65-4321 (1 lines)
 - ledger: <sandbox>/home_discover/pms_tools/runs/mock-discover/ledger.tsv  keys: <sandbox>/home_discover/pms_tools/runs/mock-discover/join_keys.tsv  raw: <sandbox>/home_discover/pms_tools/runs/mock-discover/raw/
@@ -563,19 +602,19 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
   terminal: None
   failure_codes: {}
   na      : []
-  join keys (8): flowToken=0a1b2c3d-1111-4222-8333-944455556666, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
-  evidence files with hits: 11 (follow-up hits: 6)
+  join keys (9): flowToken=0a1b2c3d-1111-4222-8333-944455556666, echoToken=ECHO-7f3a9c21, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
+  evidence files with hits: 12 (follow-up hits: 7)
   [PASS] system discovered via cm-<prefix> convention (pool-verified)
   [PASS] gates reached despite empty KB module
   [PASS] KB learned channels.OTA2.log_apps.reservation_inbound
 
 ================ scenario: relearn  (ref=OTA2-1000000001 at=2026-01-10T12:00:00) ================
-trace exit=0  backend calls=64  kb-write: [kb-write] updated (channels.OTA2 +0 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
+trace exit=0  backend calls=76  kb-write: [kb-write] updated (channels.OTA2 +0 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
 ==================== VERBOSE FUNCTION REPORT ====================
 --- [Function: System & App Resolution (resolve.tsv)] ---
 sys_from_kb_apps|OTA2|cm-ota2
-kb_module|OTA2|sys=cm-ota2|apps=cm-ota2/booking-gateway  cm-ota2/booking-processor
-pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/property-api
+kb_module|OTA2|sys=cm-ota2|apps=cm-ota2/booking-gateway  cm-ota2/booking-processor cm-ota2/notify-gateway
+pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/notify-gateway,cm-ota2/property-api
 catalog_only|OTA2|cm-ota2/avail-api|in live pool, not in KB
 catalog_only|OTA2|cm-ota2/avail-gateway|in live pool, not in KB
 catalog_only|OTA2|cm-ota2/booking-job|in live pool, not in KB
@@ -594,6 +633,12 @@ grep cm-ota2 booking-processor 2026-01-10-13 OTA2-1000000001
 grep cm-ota2 booking-processor 2026-01-10-11 1000000001
 grep cm-ota2 booking-processor 2026-01-10-12 1000000001
 grep cm-ota2 booking-processor 2026-01-10-13 1000000001
+grep cm-ota2 notify-gateway 2026-01-10-11 OTA2-1000000001
+grep cm-ota2 notify-gateway 2026-01-10-12 OTA2-1000000001
+grep cm-ota2 notify-gateway 2026-01-10-13 OTA2-1000000001
+grep cm-ota2 notify-gateway 2026-01-10-11 1000000001
+grep cm-ota2 notify-gateway 2026-01-10-12 1000000001
+grep cm-ota2 notify-gateway 2026-01-10-13 1000000001
 grep pms-hub booking-api 2026-01-10-11 OTA2-1000000001
 grep pms-hub booking-api 2026-01-10-12 OTA2-1000000001
 grep pms-hub booking-api 2026-01-10-13 OTA2-1000000001
@@ -636,6 +681,12 @@ grep pms-hub booking-api 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-11 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-12 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
+grep cm-ota2 notify-gateway 2026-01-10-11 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-12 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-13 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-11 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-12 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-13 ECHO-7f3a9c21
 grep pms-hub booking-api 2026-01-10-11 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
@@ -647,6 +698,7 @@ grep hub-channel-store booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456
 grep hub-channel-store booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
 --- [Function: Join Key Harvester (join_keys.tsv)] ---
 flowToken	0a1b2c3d-1111-4222-8333-944455556666	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
+echoToken	ECHO-7f3a9c21	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 sourceAgentCode	OTA2	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 roomCode	DBL	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 ratePlanCode	BAR	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
@@ -674,7 +726,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
     "failure_codes": {},
     "email_silence": false,
     "terminal": null,
-    "hits": 6,
+    "hits": 8,
     "context_files": 0
 }
 --- [Function: Main Trace Report Generator (REPORT.md)] ---
@@ -683,13 +735,13 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - patterns: OTA2-1000000001 1000000001  (uppercase rule: CM booking IDs are stored UPPERCASE; lowercase variants dropped - verified 2026-10-28)
 - time anchor: **2026-01-10-12** locked from live data (typed AT=2026-01-10T12:00:00, drift 0h; tz_offset=-6 informational) - downstream scans = anchor +/-1h
 - channel cross-check: sourceAgentCode=OTA2  matches resolved channel OTA2 - diagnosis confirmed
-[02:30:50] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
-[02:30:50] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
-[02:30:50] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
-[02:30:51] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
-[02:30:51] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
+[04:01:54] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
+[04:01:54] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
+[04:01:54] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
+[04:01:55] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
+[04:01:55] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
 
-## VERDICT (synthesized 2026-11-16T02:30:51Z)
+## VERDICT (synthesized 2026-11-16T04:01:55Z)
 
 - [x] **ARRIVAL** - 2 hit(s)
 - [ ] INVENTORY - no hits in evidence
@@ -701,7 +753,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 
 
 ### Elimination ledger (why an empty stage is believed)
-- coverage: 67 stage(s) run, 54 empty, 13 with hits; preflight: n/a
+- coverage: 79 stage(s) run, 65 empty, 14 with hits; preflight: n/a
 - **INVENTORY empty**: inventory state only visible via listing_id follow scans; none of the harvested keys produced an inventory hit
 - **CONVERSION empty**: no faultCode/status=Error observed in any evidence hit
 
@@ -711,9 +763,10 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_1000000001 (1 lines)
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_OTA2-1000000001 (1 lines)
 - HIT: f_cm-ota2_booking-processor_2026-01-10-12_0a1b2c3d-1111 (1 lines)
+- HIT: f_cm-ota2_notify-gateway_2026-01-10-12_ECHO-7f3a9c21 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
-- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
+- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (2 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_9c8b7a65-4321 (1 lines)
 - ledger: <sandbox>/home_relearn/pms_tools/runs/mock-relearn/ledger.tsv  keys: <sandbox>/home_relearn/pms_tools/runs/mock-relearn/join_keys.tsv  raw: <sandbox>/home_relearn/pms_tools/runs/mock-relearn/raw/
@@ -727,11 +780,11 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
   terminal: None
   failure_codes: {}
   na      : []
-  join keys (8): flowToken=0a1b2c3d-1111-4222-8333-944455556666, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
-  evidence files with hits: 11 (follow-up hits: 6)
+  join keys (9): flowToken=0a1b2c3d-1111-4222-8333-944455556666, echoToken=ECHO-7f3a9c21, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
+  evidence files with hits: 12 (follow-up hits: 7)
   [PASS] session B resolved from learned KB apps (authoritative)
   [PASS] session B same gates
-  [PASS] session B cheaper: 64 calls < 88 (discovery)
+  [PASS] session B cheaper: 76 calls < 100 (discovery)
 
 ================ scenario: convfail  (ref=OTA2-2000000002 at=2026-01-10T15:00:00) ================
 trace exit=0  backend calls=79  kb-write: [kb-write] updated (channels.OTA2 +0 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
@@ -739,7 +792,8 @@ trace exit=0  backend calls=79  kb-write: [kb-write] updated (channels.OTA2 +0 a
 --- [Function: System & App Resolution (resolve.tsv)] ---
 sys_from_kb_apps|OTA2|cm-ota2
 kb_module|OTA2|sys=cm-ota2|apps=cm-ota2/booking-gateway cm-ota2/avail-gateway cm-ota2/booking-processor cm-ota2/booking-job cm-ota2/avail-api cm-ota2/property-api
-pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/property-api
+pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/notify-gateway,cm-ota2/property-api
+catalog_only|OTA2|cm-ota2/notify-gateway|in live pool, not in KB
 --- [Function: Backend Search & Grep Calls (mock_calls.log)] ---
 ls cm-ota2 *
 grep cm-ota2 booking-gateway 2026-01-10-14 OTA2-2000000002
@@ -856,9 +910,9 @@ hubBookingUuid	7d7d7d7d-aaaa-4bbb-8ccc-dddddddddddd	2026-01-10-15	f_hub-channel-
 - patterns: OTA2-2000000002 2000000002  (uppercase rule: CM booking IDs are stored UPPERCASE; lowercase variants dropped - verified 2026-10-28)
 - time anchor: **2026-01-10-15** locked from live data (typed AT=2026-01-10T15:00:00, drift 0h; tz_offset=-6 informational) - downstream scans = anchor +/-1h
 - channel cross-check: sourceAgentCode=OTA2  matches resolved channel OTA2 - diagnosis confirmed
-[02:30:57] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
+[04:02:01] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
 
-## VERDICT (synthesized 2026-11-16T02:30:57Z)
+## VERDICT (synthesized 2026-11-16T04:02:02Z)
 
 - [x] **ARRIVAL** - 2 hit(s)
 - [ ] INVENTORY - no hits in evidence
@@ -909,21 +963,32 @@ hubBookingUuid	7d7d7d7d-aaaa-4bbb-8ccc-dddddddddddd	2026-01-10-15	f_hub-channel-
   [PASS] terminal signature recognised from KB
 
 ================ scenario: backend contract (backends/s3search.py, s3grep.py) ================
-  [PASS] ls * * lists the estate (rc=0, 14 lines)
+  [PASS] ls * * lists the estate (rc=0, 25 lines)
+         | cloudpms/entity-api
+         | cloudpms/main-ra
+         | cm/avail-api-ra
+         | cm/avail-api-rb
+         | cm/entity-api-ra
          | cm-ota2/avail-api
          | cm-ota2/avail-gateway
          | cm-ota2/booking-gateway
          | cm-ota2/booking-job
          | cm-ota2/booking-processor
+         | cm-ota2/notify-gateway
          | cm-ota2/property-api
+         | hub-channel-link/link-api
          | hub-channel-store/booking-api
          | hub-channel-store/notification-api
+         | platform-session/api
+         | pms-cm-bridge/avail-sync
          | pms-cm-bridge/booking-api
+         | pms-cm-bridge/hub-sync-api
          | pms-cm-bridge/state-sync-api
          | pms-hub/avail-api
          | pms-hub/booking-api
          | pms-hub/hub-booking-events
          | pms-hub/pms-booking-events
+         | portal-property/gui-gateway
   [PASS] ls glob cm-ota2 booking-* (rc=0, 3 lines)
          | cm-ota2/booking-gateway
          | cm-ota2/booking-job
@@ -934,10 +999,11 @@ hubBookingUuid	7d7d7d7d-aaaa-4bbb-8ccc-dddddddddddd	2026-01-10-15	f_hub-channel-
   [PASS] grep one hour (.gz file) (rc=0, 2 lines)
          | {"@timestamp":"2026-01-10T15:20:01.100Z","level":"INFO","msg":"make_reservation received","reservationId":"OTA2-2000000002","sourceAgentCode":"OTA2","flowToken":"5e5e5e5e-2222-4333-8444-955566667777"}
          | {"@timestamp":"2026-01-10T15:20:01.600Z","level":"INFO","msg":"RESPONSE make_reservation","reservationId":"OTA2-2000000002","statusCode":200,"flowToken":"5e5e5e5e-2222-4333-8444-955566667777"}
-  [PASS] grep whole day, sys glob (rc=0, 4 lines)
+  [PASS] grep whole day, sys glob (rc=0, 5 lines)
          | {"@timestamp":"2026-01-10T12:03:12.120Z","level":"INFO","msg":"acceptance persisted","statusCode":200,"flowToken":"0a1b2c3d-1111-4222-8333-944455556666","hubBookingUuid":"9c8b7a65-4321-4fed-8cba-0123456789ab"}
          | {"@timestamp":"2026-01-10T12:03:12.733Z","level":"INFO","msg":"Fetching reservation for delivery","cmBookingId":"OTA2-1000000001","hubBookingUuid":"9c8b7a65-4321-4fed-8cba-0123456789ab","flowToken":"0a1b2c3d-1111-4222-8333-944455556666"}
          | {"@timestamp":"2026-01-10T12:03:13.050Z","level":"INFO","msg":"pmsBookings upsert","hubBookingUuid":"9c8b7a65-4321-4fed-8cba-0123456789ab","pmsBookingId":"DIR-OTA2-1000000001-1","pmsType":"CLOUDPMS","hubPmsPropertyUuid":"22222222-3333-4444-8555-666666666666"}
+         | {"@timestamp":"2026-01-10T12:03:13.300Z","level":"INFO","msg":"PMS document sent","hubBookingUuid":"9c8b7a65-4321-4fed-8cba-0123456789ab","payload":"<Reservation><valueNum>220.00</valueNum><Total CurrencyCode=\"EUR\"/><RoomType RoomTypeCode=\"DBL\"/><RatePlan RatePlanCode=\"BAR\"/><TimeSpan Start=\"2026-02-14\" End=\"2026-02-16\"/><GivenName>Alex</GivenName></Reservation>"}
          | {"@timestamp":"2026-01-10T12:03:14.410Z","level":"INFO","msg":"Delivered reservation version 1","hubBookingUuid":"9c8b7a65-4321-4fed-8cba-0123456789ab","status":"Delivered","flowToken":"0a1b2c3d-1111-4222-8333-944455556666"}
   [PASS] grep wrong hour -> no match (rc=1, 0 lines)
   [PASS] query field equality (rc=0, 1 lines)
@@ -954,12 +1020,13 @@ hubBookingUuid	7d7d7d7d-aaaa-4bbb-8ccc-dddddddddddd	2026-01-10-15	f_hub-channel-
   [PASS] s3:// transport returns identical lines
 
 ================ scenario: via-ssh  (ref=OTA2-1000000001 at=2026-01-10T12:00:00) ================
-trace exit=0  backend calls=88  kb-write: [kb-write] updated (channels.OTA2 +0 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
+trace exit=0  backend calls=94  kb-write: [kb-write] updated (channels.OTA2 +1 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
 ==================== VERBOSE FUNCTION REPORT ====================
 --- [Function: System & App Resolution (resolve.tsv)] ---
 sys_from_kb_apps|OTA2|cm-ota2
 kb_module|OTA2|sys=cm-ota2|apps=cm-ota2/booking-gateway cm-ota2/avail-gateway cm-ota2/booking-processor cm-ota2/booking-job cm-ota2/avail-api cm-ota2/property-api
-pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/property-api
+pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/notify-gateway,cm-ota2/property-api
+catalog_only|OTA2|cm-ota2/notify-gateway|in live pool, not in KB
 --- [Function: Backend Search & Grep Calls (mock_calls.log)] ---
 ls cm-ota2 *
 grep cm-ota2 booking-gateway 2026-01-10-11 OTA2-1000000001
@@ -1040,6 +1107,12 @@ grep pms-hub booking-api 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-11 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-12 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
+grep cm-ota2 notify-gateway 2026-01-10-11 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-12 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-13 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-11 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-12 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-13 ECHO-7f3a9c21
 grep pms-hub booking-api 2026-01-10-11 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
@@ -1051,6 +1124,7 @@ grep hub-channel-store booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456
 grep hub-channel-store booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
 --- [Function: Join Key Harvester (join_keys.tsv)] ---
 flowToken	0a1b2c3d-1111-4222-8333-944455556666	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
+echoToken	ECHO-7f3a9c21	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 sourceAgentCode	OTA2	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 roomCode	DBL	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 ratePlanCode	BAR	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
@@ -1078,7 +1152,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
     "failure_codes": {},
     "email_silence": false,
     "terminal": null,
-    "hits": 6,
+    "hits": 8,
     "context_files": 0
 }
 --- [Function: Main Trace Report Generator (REPORT.md)] ---
@@ -1087,13 +1161,13 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - patterns: OTA2-1000000001 1000000001  (uppercase rule: CM booking IDs are stored UPPERCASE; lowercase variants dropped - verified 2026-10-28)
 - time anchor: **2026-01-10-12** locked from live data (typed AT=2026-01-10T12:00:00, drift 0h; tz_offset=-6 informational) - downstream scans = anchor +/-1h
 - channel cross-check: sourceAgentCode=OTA2  matches resolved channel OTA2 - diagnosis confirmed
-[02:31:04] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
-[02:31:04] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
-[02:31:04] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
-[02:31:05] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
-[02:31:05] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
+[04:02:09] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
+[04:02:09] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
+[04:02:09] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
+[04:02:10] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
+[04:02:10] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
 
-## VERDICT (synthesized 2026-11-16T02:31:05Z)
+## VERDICT (synthesized 2026-11-16T04:02:10Z)
 
 - [x] **ARRIVAL** - 2 hit(s)
 - [ ] INVENTORY - no hits in evidence
@@ -1105,7 +1179,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 
 
 ### Elimination ledger (why an empty stage is believed)
-- coverage: 91 stage(s) run, 78 empty, 13 with hits; preflight: n/a
+- coverage: 97 stage(s) run, 83 empty, 14 with hits; preflight: n/a
 - **INVENTORY empty**: inventory state only visible via listing_id follow scans; none of the harvested keys produced an inventory hit
 - **CONVERSION empty**: no faultCode/status=Error observed in any evidence hit
 
@@ -1115,9 +1189,10 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_1000000001 (1 lines)
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_OTA2-1000000001 (1 lines)
 - HIT: f_cm-ota2_booking-processor_2026-01-10-12_0a1b2c3d-1111 (1 lines)
+- HIT: f_cm-ota2_notify-gateway_2026-01-10-12_ECHO-7f3a9c21 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
-- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
+- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (2 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_9c8b7a65-4321 (1 lines)
 - ledger: <sandbox>/home_via-ssh/pms_tools/runs/mock-via-ssh/ledger.tsv  keys: <sandbox>/home_via-ssh/pms_tools/runs/mock-via-ssh/join_keys.tsv  raw: <sandbox>/home_via-ssh/pms_tools/runs/mock-via-ssh/raw/
@@ -1131,17 +1206,18 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
   terminal: None
   failure_codes: {}
   na      : []
-  join keys (8): flowToken=0a1b2c3d-1111-4222-8333-944455556666, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
-  evidence files with hits: 11 (follow-up hits: 6)
+  join keys (9): flowToken=0a1b2c3d-1111-4222-8333-944455556666, echoToken=ECHO-7f3a9c21, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
+  evidence files with hits: 12 (follow-up hits: 7)
   [PASS] all five gates lit over ssh transport
 
 ================ scenario: via-s3  (ref=OTA2-1000000001 at=2026-01-10T12:00:00) ================
-trace exit=0  backend calls=88  kb-write: [kb-write] updated (channels.OTA2 +0 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
+trace exit=0  backend calls=94  kb-write: [kb-write] updated (channels.OTA2 +1 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
 ==================== VERBOSE FUNCTION REPORT ====================
 --- [Function: System & App Resolution (resolve.tsv)] ---
 sys_from_kb_apps|OTA2|cm-ota2
 kb_module|OTA2|sys=cm-ota2|apps=cm-ota2/booking-gateway cm-ota2/avail-gateway cm-ota2/booking-processor cm-ota2/booking-job cm-ota2/avail-api cm-ota2/property-api
-pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/property-api
+pool|cm-ota2|cm-ota2/avail-api,cm-ota2/avail-gateway,cm-ota2/booking-gateway,cm-ota2/booking-job,cm-ota2/booking-processor,cm-ota2/notify-gateway,cm-ota2/property-api
+catalog_only|OTA2|cm-ota2/notify-gateway|in live pool, not in KB
 --- [Function: Backend Search & Grep Calls (mock_calls.log)] ---
 ls cm-ota2 *
 grep cm-ota2 booking-gateway 2026-01-10-11 OTA2-1000000001
@@ -1222,6 +1298,12 @@ grep pms-hub booking-api 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-11 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-12 0a1b2c3d-1111-4222-8333-944455556666
 grep pms-hub pms-booking-events 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
+grep cm-ota2 notify-gateway 2026-01-10-11 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-12 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-13 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-11 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-12 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-13 ECHO-7f3a9c21
 grep pms-hub booking-api 2026-01-10-11 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456789ab
 grep pms-hub booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
@@ -1233,6 +1315,7 @@ grep hub-channel-store booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456
 grep hub-channel-store booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
 --- [Function: Join Key Harvester (join_keys.tsv)] ---
 flowToken	0a1b2c3d-1111-4222-8333-944455556666	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
+echoToken	ECHO-7f3a9c21	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 sourceAgentCode	OTA2	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 roomCode	DBL	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
 ratePlanCode	BAR	2026-01-10-12	t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001.out
@@ -1260,7 +1343,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
     "failure_codes": {},
     "email_silence": false,
     "terminal": null,
-    "hits": 6,
+    "hits": 8,
     "context_files": 0
 }
 --- [Function: Main Trace Report Generator (REPORT.md)] ---
@@ -1269,13 +1352,13 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - patterns: OTA2-1000000001 1000000001  (uppercase rule: CM booking IDs are stored UPPERCASE; lowercase variants dropped - verified 2026-10-28)
 - time anchor: **2026-01-10-12** locked from live data (typed AT=2026-01-10T12:00:00, drift 0h; tz_offset=-6 informational) - downstream scans = anchor +/-1h
 - channel cross-check: sourceAgentCode=OTA2  matches resolved channel OTA2 - diagnosis confirmed
-[02:31:12] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
-[02:31:12] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
-[02:31:12] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
-[02:31:13] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
-[02:31:13] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
+[04:02:18] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
+[04:02:18] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
+[04:02:18] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
+[04:02:19] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
+[04:02:19] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
 
-## VERDICT (synthesized 2026-11-16T02:31:13Z)
+## VERDICT (synthesized 2026-11-16T04:02:19Z)
 
 - [x] **ARRIVAL** - 2 hit(s)
 - [ ] INVENTORY - no hits in evidence
@@ -1287,7 +1370,7 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 
 
 ### Elimination ledger (why an empty stage is believed)
-- coverage: 91 stage(s) run, 78 empty, 13 with hits; preflight: n/a
+- coverage: 97 stage(s) run, 83 empty, 14 with hits; preflight: n/a
 - **INVENTORY empty**: inventory state only visible via listing_id follow scans; none of the harvested keys produced an inventory hit
 - **CONVERSION empty**: no faultCode/status=Error observed in any evidence hit
 
@@ -1297,9 +1380,10 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_1000000001 (1 lines)
 - HIT: t_pms_pms-hub_booking-api_2026-01-10-12_OTA2-1000000001 (1 lines)
 - HIT: f_cm-ota2_booking-processor_2026-01-10-12_0a1b2c3d-1111 (1 lines)
+- HIT: f_cm-ota2_notify-gateway_2026-01-10-12_ECHO-7f3a9c21 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_hub-channel-store_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
-- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
+- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (2 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_0a1b2c3d-1111 (1 lines)
 - HIT: f_pms-hub_pms-booking-events_2026-01-10-12_9c8b7a65-4321 (1 lines)
 - ledger: <sandbox>/home_via-s3/pms_tools/runs/mock-via-s3/ledger.tsv  keys: <sandbox>/home_via-s3/pms_tools/runs/mock-via-s3/join_keys.tsv  raw: <sandbox>/home_via-s3/pms_tools/runs/mock-via-s3/raw/
@@ -1313,8 +1397,1139 @@ pmsType	CLOUDPMS	2026-01-10-12	t_pms_pms-hub_booking-api_2026-01-10-12_100000000
   terminal: None
   failure_codes: {}
   na      : []
-  join keys (8): flowToken=0a1b2c3d-1111-4222-8333-944455556666, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
-  evidence files with hits: 11 (follow-up hits: 6)
+  join keys (9): flowToken=0a1b2c3d-1111-4222-8333-944455556666, echoToken=ECHO-7f3a9c21, sourceAgentCode=OTA2, roomCode=DBL, ratePlanCode=BAR, hubBookingUuid=9c8b7a65-4321-4fed-8cba-0123456789ab, hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666, pmsBookingId=DIR-OTA2-1000000001-1, pmsType=CLOUDPMS
+  evidence files with hits: 12 (follow-up hits: 7)
   [PASS] all five gates lit over s3 transport
 
-RESULT: PASS (all scenarios)
+================ scenario: fidelity-files  (PT_TASKS='fidelity') ================
+exit=0  backend calls=0
+==================== VERBOSE MODE REPORT ====================
+--- [Backend calls (mock_calls.log)] ---
+(none)
+--- [fidelity_report.txt] ---
+FIDELITY REPORT
+ota_doc=<sandbox>/docs/ota.xml
+pms_doc=<sandbox>/docs/pms.xml
+
+rate.amount_after_tax -> pms.amount        PRESERVED    220.00 -> 220.00
+rate.amount_before_tax                     ABSENT_BOTH  -
+rate.currency                              PRESERVED    EUR -> EUR
+room.code                                  PRESERVED    DBL -> DBL
+rate.code                                  PRESERVED    BAR -> BAR
+guest.names                                PRESERVED    ['Alex'] -> ['Alex']
+stay.dates                                 PRESERVED    ('2026-02-14', '2026-02-16') -> ('2026-02-14', '2026-02-16')
+rate.taxes[]                               PRESERVED    20.00 -> 20.00
+
+VERDICTS:
+--- [run log] ---
+== PMS TOOL PASTE v0.9.9-oss ==
+[fetch] backend: <repo>/backends/s3search.py (S3S_ROOT=<sandbox>/logs) | archive: <repo>/backends/s3grep.py
+[kb] 0.9.7 @ <sandbox>/home_fidelity-files/pms_tools/kb/connector_kb.json (PT_KB_FILE=connector_kb.json) channels=[OTA1 OTA2 OTA3 OTA4] pms=[PMSA_XML PMSA_REST LEGACYPMS CLOUDPMS]
+[window] booking ts=2026-01-10T12:00:00 taken AS-IS (log timeline); tz_offset=-6 informational (property platform tz), NOT applied; uncertain=1 fanout=+/-3
+== PMS TOOL PASTE v0.9.9-oss - case=mock-fidelity-files tasks='fidelity' mode=run goal='custom' ==
+[fidelity] ota=<sandbox>/docs/ota.xml pms=<sandbox>/docs/pms.xml
+FIDELITY REPORT
+ota_doc=<sandbox>/docs/ota.xml
+pms_doc=<sandbox>/docs/pms.xml
+
+rate.amount_after_tax -> pms.amount        PRESERVED    220.00 -> 220.00
+rate.amount_before_tax                     ABSENT_BOTH  -
+rate.currency                              PRESERVED    EUR -> EUR
+room.code                                  PRESERVED    DBL -> DBL
+rate.code                                  PRESERVED    BAR -> BAR
+guest.names                                PRESERVED    ['Alex'] -> ['Alex']
+stay.dates                                 PRESERVED    ('2026-02-14', '2026-02-16') -> ('2026-02-14', '2026-02-16')
+rate.taxes[]                               PRESERVED    20.00 -> 20.00
+
+VERDICTS:
+== DONE 2026-11-16T04:02:20Z - results: <sandbox>/home_fidelity-files/pms_tools/runs/mock-fidelity-files ==
+fetch: cd ~/pms_tools/runs && zip -r mock-fidelity-files.zip 'mock-fidelity-files' -x '__MACOSX*'
+=============================================================
+  [PASS] exit 0, no python traceback
+  [PASS] fidelity_report.txt written
+  [PASS] amount/currency/room/rate/guest/dates/taxes PRESERVED
+  [PASS] no verdicts raised for identical documents
+
+================ scenario: fidelity-nodocs  (PT_TASKS='fidelity') ================
+exit=0  backend calls=0
+==================== VERBOSE MODE REPORT ====================
+--- [Backend calls (mock_calls.log)] ---
+(none)
+--- [REPORT.md] ---
+- fidelity: docs unavailable (ota=none pms=none); if the verdict is CONVERSION failure, no PMS-bound doc exists by definition.
+--- [run log] ---
+== PMS TOOL PASTE v0.9.9-oss ==
+[fetch] backend: <repo>/backends/s3search.py (S3S_ROOT=<sandbox>/logs) | archive: <repo>/backends/s3grep.py
+[kb] 0.9.7 @ <sandbox>/home_fidelity-nodocs/pms_tools/kb/connector_kb.json (PT_KB_FILE=connector_kb.json) channels=[OTA1 OTA2 OTA3 OTA4] pms=[PMSA_XML PMSA_REST LEGACYPMS CLOUDPMS]
+[window] booking ts=2026-01-10T12:00:00 taken AS-IS (log timeline); tz_offset=-6 informational (property platform tz), NOT applied; uncertain=1 fanout=+/-3
+== PMS TOOL PASTE v0.9.9-oss - case=mock-fidelity-nodocs tasks='fidelity' mode=run goal='custom' ==
+[fidelity] docs unavailable (ota=none pms=none).
+[fidelity] when the trace verdict is a CONVERSION failure, no PMS-bound doc exists - the diff target is the conversion gate, not a document.
+== DONE 2026-11-16T04:02:21Z - results: <sandbox>/home_fidelity-nodocs/pms_tools/runs/mock-fidelity-nodocs ==
+fetch: cd ~/pms_tools/runs && zip -r mock-fidelity-nodocs.zip 'mock-fidelity-nodocs' -x '__MACOSX*'
+=============================================================
+  [PASS] reports docs unavailable instead of guessing
+
+================ scenario: trace-fidelity  (PT_TASKS='trace fidelity') ================
+exit=0  backend calls=96
+==================== VERBOSE MODE REPORT ====================
+--- [Backend calls (mock_calls.log)] ---
+ls cm-ota2 *
+grep cm-ota2 booking-gateway 2026-01-10-11 OTA2-1000000001
+grep cm-ota2 booking-gateway 2026-01-10-12 OTA2-1000000001
+grep cm-ota2 booking-gateway 2026-01-10-13 OTA2-1000000001
+grep cm-ota2 booking-gateway 2026-01-10-11 1000000001
+grep cm-ota2 booking-gateway 2026-01-10-12 1000000001
+grep cm-ota2 booking-gateway 2026-01-10-13 1000000001
+grep cm-ota2 avail-gateway 2026-01-10-11 OTA2-1000000001
+grep cm-ota2 avail-gateway 2026-01-10-12 OTA2-1000000001
+grep cm-ota2 avail-gateway 2026-01-10-13 OTA2-1000000001
+grep cm-ota2 avail-gateway 2026-01-10-11 1000000001
+grep cm-ota2 avail-gateway 2026-01-10-12 1000000001
+grep cm-ota2 avail-gateway 2026-01-10-13 1000000001
+grep cm-ota2 booking-processor 2026-01-10-11 OTA2-1000000001
+grep cm-ota2 booking-processor 2026-01-10-12 OTA2-1000000001
+grep cm-ota2 booking-processor 2026-01-10-13 OTA2-1000000001
+grep cm-ota2 booking-processor 2026-01-10-11 1000000001
+grep cm-ota2 booking-processor 2026-01-10-12 1000000001
+grep cm-ota2 booking-processor 2026-01-10-13 1000000001
+grep cm-ota2 booking-job 2026-01-10-11 OTA2-1000000001
+grep cm-ota2 booking-job 2026-01-10-12 OTA2-1000000001
+grep cm-ota2 booking-job 2026-01-10-13 OTA2-1000000001
+grep cm-ota2 booking-job 2026-01-10-11 1000000001
+grep cm-ota2 booking-job 2026-01-10-12 1000000001
+grep cm-ota2 booking-job 2026-01-10-13 1000000001
+grep cm-ota2 avail-api 2026-01-10-11 OTA2-1000000001
+grep cm-ota2 avail-api 2026-01-10-12 OTA2-1000000001
+grep cm-ota2 avail-api 2026-01-10-13 OTA2-1000000001
+grep cm-ota2 avail-api 2026-01-10-11 1000000001
+grep cm-ota2 avail-api 2026-01-10-12 1000000001
+grep cm-ota2 avail-api 2026-01-10-13 1000000001
+grep cm-ota2 property-api 2026-01-10-11 OTA2-1000000001
+grep cm-ota2 property-api 2026-01-10-12 OTA2-1000000001
+grep cm-ota2 property-api 2026-01-10-13 OTA2-1000000001
+grep cm-ota2 property-api 2026-01-10-11 1000000001
+grep cm-ota2 property-api 2026-01-10-12 1000000001
+grep cm-ota2 property-api 2026-01-10-13 1000000001
+grep pms-hub booking-api 2026-01-10-11 OTA2-1000000001
+grep pms-hub booking-api 2026-01-10-12 OTA2-1000000001
+grep pms-hub booking-api 2026-01-10-13 OTA2-1000000001
+grep pms-hub booking-api 2026-01-10-11 1000000001
+grep pms-hub booking-api 2026-01-10-12 1000000001
+grep pms-hub booking-api 2026-01-10-13 1000000001
+grep pms-hub pms-booking-events 2026-01-10-11 OTA2-1000000001
+grep pms-hub pms-booking-events 2026-01-10-12 OTA2-1000000001
+grep pms-hub pms-booking-events 2026-01-10-13 OTA2-1000000001
+grep pms-hub pms-booking-events 2026-01-10-11 1000000001
+grep pms-hub pms-booking-events 2026-01-10-12 1000000001
+grep pms-hub pms-booking-events 2026-01-10-13 1000000001
+grep pms-hub hub-booking-events 2026-01-10-11 OTA2-1000000001
+grep pms-hub hub-booking-events 2026-01-10-12 OTA2-1000000001
+grep pms-hub hub-booking-events 2026-01-10-13 OTA2-1000000001
+grep pms-hub hub-booking-events 2026-01-10-11 1000000001
+grep pms-hub hub-booking-events 2026-01-10-12 1000000001
+grep pms-hub hub-booking-events 2026-01-10-13 1000000001
+grep pms-cm-bridge state-sync-api 2026-01-10-11 OTA2-1000000001
+grep pms-cm-bridge state-sync-api 2026-01-10-12 OTA2-1000000001
+grep pms-cm-bridge state-sync-api 2026-01-10-13 OTA2-1000000001
+grep pms-cm-bridge state-sync-api 2026-01-10-11 1000000001
+grep pms-cm-bridge state-sync-api 2026-01-10-12 1000000001
+grep pms-cm-bridge state-sync-api 2026-01-10-13 1000000001
+grep pms-cm-bridge booking-api 2026-01-10-11 OTA2-1000000001
+grep pms-cm-bridge booking-api 2026-01-10-12 OTA2-1000000001
+grep pms-cm-bridge booking-api 2026-01-10-13 OTA2-1000000001
+grep pms-cm-bridge booking-api 2026-01-10-11 1000000001
+grep pms-cm-bridge booking-api 2026-01-10-12 1000000001
+grep pms-cm-bridge booking-api 2026-01-10-13 1000000001
+grep cm-ota2 booking-processor 2026-01-10-11 0a1b2c3d-1111-4222-8333-944455556666
+grep cm-ota2 booking-processor 2026-01-10-12 0a1b2c3d-1111-4222-8333-944455556666
+grep cm-ota2 booking-processor 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
+grep hub-channel-store booking-api 2026-01-10-11 0a1b2c3d-1111-4222-8333-944455556666
+grep hub-channel-store booking-api 2026-01-10-12 0a1b2c3d-1111-4222-8333-944455556666
+grep hub-channel-store booking-api 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
+grep pms-hub booking-api 2026-01-10-11 0a1b2c3d-1111-4222-8333-944455556666
+grep pms-hub booking-api 2026-01-10-12 0a1b2c3d-1111-4222-8333-944455556666
+grep pms-hub booking-api 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
+grep pms-hub pms-booking-events 2026-01-10-11 0a1b2c3d-1111-4222-8333-944455556666
+grep pms-hub pms-booking-events 2026-01-10-12 0a1b2c3d-1111-4222-8333-944455556666
+grep pms-hub pms-booking-events 2026-01-10-13 0a1b2c3d-1111-4222-8333-944455556666
+grep cm-ota2 notify-gateway 2026-01-10-11 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-12 ECHO-7f3a9c21
+grep cm-ota2 notify-gateway 2026-01-10-13 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-11 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-12 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-13 ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-11 9c8b7a65-4321-4fed-8cba-0123456789ab
+grep pms-hub booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456789ab
+grep pms-hub booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
+grep pms-hub pms-booking-events 2026-01-10-11 9c8b7a65-4321-4fed-8cba-0123456789ab
+grep pms-hub pms-booking-events 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456789ab
+grep pms-hub pms-booking-events 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
+grep hub-channel-store booking-api 2026-01-10-11 9c8b7a65-4321-4fed-8cba-0123456789ab
+grep hub-channel-store booking-api 2026-01-10-12 9c8b7a65-4321-4fed-8cba-0123456789ab
+grep hub-channel-store booking-api 2026-01-10-13 9c8b7a65-4321-4fed-8cba-0123456789ab
+grep cm-ota2 notify-gateway 2026-01-10-* ECHO-7f3a9c21
+grep pms-hub booking-api 2026-01-10-* 9c8b7a65-4321-4fed-8cba-0123456789ab
+--- [verdict.json] ---
+{
+ "reached": [
+  "ARRIVAL",
+  "ACCEPTANCE",
+  "CM_STORE",
+  "PMS_RECEIVE",
+  "DELIVERY"
+ ],
+ "missing": [
+  "INVENTORY",
+  "CONVERSION"
+ ],
+ "na": [],
+ "skipped": [],
+ "fd_files": 0,
+ "fd_admitted": 0,
+ "failure_codes": {},
+ "email_silence": false,
+ "terminal": null,
+ "hits": 8,
+ "context_files": 0
+}--- [fidelity_report.txt] ---
+FIDELITY REPORT
+ota_doc=<sandbox>/home_trace-fidelity/pms_tools/runs/mock-trace-fidelity/raw/ota_doc.xml
+pms_doc=<sandbox>/home_trace-fidelity/pms_tools/runs/mock-trace-fidelity/raw/pms_doc.xml
+
+rate.amount_after_tax -> pms.amount        PRESERVED    220.00 -> 220.00
+rate.amount_before_tax                     DROPPED      200.00 -> (absent)
+rate.currency                              PRESERVED    EUR -> EUR
+room.code                                  PRESERVED    DBL -> DBL
+rate.code                                  PRESERVED    BAR -> BAR
+guest.names                                PRESERVED    ['Alex'] -> ['Alex']
+stay.dates                                 PRESERVED    ('2026-02-14', '2026-02-16') -> ('2026-02-14', '2026-02-16')
+rate.taxes[]                               DROPPED      20.00 -> (absent)
+
+VERDICTS:
+  - CONFIG_IGNORED: PMS doc carries the after-tax amount while a before-tax amount existed at source
+  - TAX_BREAKDOWN_DROPPED: 1 tax lines at source, none in the PMS doc
+  - FIELD_DROPPED: rate.amount_before_tax (200.00 -> (absent))
+  - FIELD_DROPPED: rate.taxes[] (20.00 -> (absent))
+--- [REPORT.md] ---
+# PMS TOOL PASTE v0.9.9-oss - case mock-trace-fidelity
+- ref=OTA2-1000000001 pms=CLOUDPMS window=2026-01-10..2026-01-10 at=2026-01-10T12:00:00 uncertain=1 tz=-6
+- patterns: OTA2-1000000001 1000000001  (uppercase rule: CM booking IDs are stored UPPERCASE; lowercase variants dropped - verified 2026-10-28)
+- time anchor: **2026-01-10-12** locked from live data (typed AT=2026-01-10T12:00:00, drift 0h; tz_offset=-6 informational) - downstream scans = anchor +/-1h
+- channel cross-check: sourceAgentCode=OTA2  matches resolved channel OTA2 - diagnosis confirmed
+[04:02:27] [follow] sourceAgentCode=OTA2 - context-only (low selectivity, co-tenant risk); not swept
+[04:02:27] [follow] roomCode=DBL - context-only (low selectivity, co-tenant risk); not swept
+[04:02:27] [follow] ratePlanCode=BAR - context-only (low selectivity, co-tenant risk); not swept
+[04:02:28] [follow] hubPmsPropertyUuid=22222222-3333-4444-8555-666666666666 - context-only (low selectivity, co-tenant risk); not swept
+[04:02:28] [follow] pmsType=CLOUDPMS - context-only (low selectivity, co-tenant risk); not swept
+
+## VERDICT (synthesized 2026-11-16T04:02:28Z)
+
+- [x] **ARRIVAL** - 2 hit(s)
+- [ ] INVENTORY - no hits in evidence
+- [x] **ACCEPTANCE** - 2 hit(s), first at 2026-01-10T12:03:12.120Z
+- [x] **CM_STORE** - 1 hit(s)
+- [x] **PMS_RECEIVE** - 1 hit(s)
+- [ ] CONVERSION - no hits in evidence
+- [x] **DELIVERY** - 1 hit(s), first at 2026-01-10T12:03:14.410Z
+
+
+### Elimination ledger (why an empty stage is believed)
+- coverage: 97 stage(s) run, 83 empty, 14 with hits; preflight: n/a
+- **INVENTORY empty**: inventory state only visible via listing_id follow scans; none of the harvested keys produced an inventory hit
+- **CONVERSION empty**: no faultCode/status=Error observed in any evidence hit
+
+- HIT: t_fallback_icase (4 lines) [full-day: ref/token-filtered at verdict]
+- HIT: t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001 (2 lines)
+- HIT: t_kb_cm-ota2_booking-gateway_2026-01-10-12_OTA2-1000000001 (2 lines)
+- HIT: t_pms_pms-hub_booking-api_2026-01-10-12_1000000001 (1 lines)
+- HIT: t_pms_pms-hub_booking-api_2026-01-10-12_OTA2-1000000001 (1 lines)
+- HIT: f_cm-ota2_booking-processor_2026-01-10-12_0a1b2c3d-1111 (1 lines)
+- HIT: f_cm-ota2_notify-gateway_2026-01-10-12_ECHO-7f3a9c21 (1 lines)
+- HIT: f_hub-channel-store_booking-api_2026-01-10-12_0a1b2c3d-1111 (1 lines)
+- HIT: f_hub-channel-store_booking-api_2026-01-10-12_9c8b7a65-4321 (1 lines)
+- HIT: f_pms-hub_booking-api_2026-01-10-12_9c8b7a65-4321 (2 lines)
+- HIT: f_pms-hub_pms-booking-events_2026-01-10-12_0a1b2c3d-1111 (1 lines)
+- HIT: f_pms-hub_pms-booking-events_2026-01-10-12_9c8b7a65-4321 (1 lines)
+- ledger: <sandbox>/home_trace-fidelity/pms_tools/runs/mock-trace-fidelity/ledger.tsv  keys: <sandbox>/home_trace-fidelity/pms_tools/runs/mock-trace-fidelity/join_keys.tsv  raw: <sandbox>/home_trace-fidelity/pms_tools/runs/mock-trace-fidelity/raw/
+--- [NEXT_ACTIONS.md] ---
+# NEXT ACTIONS (chained from the verdict - the tool's own reading of what to do now)
+
+1. **Delivered**: chain into fidelity - re-paste with PT_TASKS="trace fidelity" (docs auto-fetch from the harvested tokens) to verify OTA->PMS data transformation
+--- [run log] ---
+== PMS TOOL PASTE v0.9.9-oss ==
+[fetch] backend: <repo>/backends/s3search.py (S3S_ROOT=<sandbox>/logs) | archive: <repo>/backends/s3grep.py
+[kb] 0.9.7 @ <sandbox>/home_trace-fidelity/pms_tools/kb/connector_kb.json (PT_KB_FILE=connector_kb.json) channels=[OTA1 OTA2 OTA3 OTA4] pms=[PMSA_XML PMSA_REST LEGACYPMS CLOUDPMS]
+[window] booking ts=2026-01-10T12:00:00 taken AS-IS (log timeline); tz_offset=-6 informational (property platform tz), NOT applied; uncertain=1 fanout=+/-1
+== PMS TOOL PASTE v0.9.9-oss - case=mock-trace-fidelity tasks='trace fidelity' mode=run goal='custom' ==
+[trace] ref=OTA2-1000000001 window=2026-01-10..2026-01-10 at=2026-01-10T12:00:00 uncertain=1
+[04:02:21] [resolve] sys=cm-ota2 from KB app paths (authoritative; catalog name-match skipped)
+[04:02:21] [resolve] KB module OTA2: sys=cm-ota2 apps=cm-ota2/booking-gateway cm-ota2/avail-gateway cm-ota2/booking-processor cm-ota2/booking-job cm-ota2/avail-api cm-ota2/property-api
+[04:02:21] [resolve] pool for cm-ota2 (7 apps, verified listing): avail-api avail-gateway booking-gateway booking-job booking-processor notify-gateway property-api
+[04:02:21] [resolve] channel system: cm-ota2
+[04:02:21] [trace] patterns: OTA2-1000000001 1000000001 
+[04:02:22] [1] RUN  t_kb_cm-ota2_booking-gateway_2026-01-10-11_OTA2-1000000001 - cm-ota2/booking-gateway 2026-01-10-11 'OTA2-1000000001'
+[04:02:22] [1] DONE t_kb_cm-ota2_booking-gateway_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:22] [2] RUN  t_kb_cm-ota2_booking-gateway_2026-01-10-12_OTA2-1000000001 - cm-ota2/booking-gateway 2026-01-10-12 'OTA2-1000000001'
+[04:02:22] [2] DONE t_kb_cm-ota2_booking-gateway_2026-01-10-12_OTA2-1000000001 rc=0 lines=2
+[04:02:22] [3] RUN  t_kb_cm-ota2_booking-gateway_2026-01-10-13_OTA2-1000000001 - cm-ota2/booking-gateway 2026-01-10-13 'OTA2-1000000001'
+[04:02:22] [3] DONE t_kb_cm-ota2_booking-gateway_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:22] [4] RUN  t_kb_cm-ota2_booking-gateway_2026-01-10-11_1000000001 - cm-ota2/booking-gateway 2026-01-10-11 '1000000001'
+[04:02:22] [4] DONE t_kb_cm-ota2_booking-gateway_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:22] [5] RUN  t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001 - cm-ota2/booking-gateway 2026-01-10-12 '1000000001'
+[04:02:22] [5] DONE t_kb_cm-ota2_booking-gateway_2026-01-10-12_1000000001 rc=0 lines=2
+[04:02:22] [6] RUN  t_kb_cm-ota2_booking-gateway_2026-01-10-13_1000000001 - cm-ota2/booking-gateway 2026-01-10-13 '1000000001'
+[04:02:22] [6] DONE t_kb_cm-ota2_booking-gateway_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:22] [7] RUN  t_kb_cm-ota2_avail-gateway_2026-01-10-11_OTA2-1000000001 - cm-ota2/avail-gateway 2026-01-10-11 'OTA2-1000000001'
+[04:02:22] [7] DONE t_kb_cm-ota2_avail-gateway_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:22] [8] RUN  t_kb_cm-ota2_avail-gateway_2026-01-10-12_OTA2-1000000001 - cm-ota2/avail-gateway 2026-01-10-12 'OTA2-1000000001'
+[04:02:22] [8] DONE t_kb_cm-ota2_avail-gateway_2026-01-10-12_OTA2-1000000001 rc=1 lines=0
+[04:02:22] [9] RUN  t_kb_cm-ota2_avail-gateway_2026-01-10-13_OTA2-1000000001 - cm-ota2/avail-gateway 2026-01-10-13 'OTA2-1000000001'
+[04:02:22] [9] DONE t_kb_cm-ota2_avail-gateway_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:22] [10] RUN  t_kb_cm-ota2_avail-gateway_2026-01-10-11_1000000001 - cm-ota2/avail-gateway 2026-01-10-11 '1000000001'
+[04:02:22] [10] DONE t_kb_cm-ota2_avail-gateway_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:22] [11] RUN  t_kb_cm-ota2_avail-gateway_2026-01-10-12_1000000001 - cm-ota2/avail-gateway 2026-01-10-12 '1000000001'
+[04:02:22] [11] DONE t_kb_cm-ota2_avail-gateway_2026-01-10-12_1000000001 rc=1 lines=0
+[04:02:22] [12] RUN  t_kb_cm-ota2_avail-gateway_2026-01-10-13_1000000001 - cm-ota2/avail-gateway 2026-01-10-13 '1000000001'
+[04:02:22] [12] DONE t_kb_cm-ota2_avail-gateway_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:22] [13] RUN  t_kb_cm-ota2_booking-processor_2026-01-10-11_OTA2-1000000001 - cm-ota2/booking-processor 2026-01-10-11 'OTA2-1000000001'
+[04:02:22] [13] DONE t_kb_cm-ota2_booking-processor_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:22] [14] RUN  t_kb_cm-ota2_booking-processor_2026-01-10-12_OTA2-1000000001 - cm-ota2/booking-processor 2026-01-10-12 'OTA2-1000000001'
+[04:02:22] [14] DONE t_kb_cm-ota2_booking-processor_2026-01-10-12_OTA2-1000000001 rc=1 lines=0
+[04:02:22] [15] RUN  t_kb_cm-ota2_booking-processor_2026-01-10-13_OTA2-1000000001 - cm-ota2/booking-processor 2026-01-10-13 'OTA2-1000000001'
+[04:02:22] [15] DONE t_kb_cm-ota2_booking-processor_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:22] [16] RUN  t_kb_cm-ota2_booking-processor_2026-01-10-11_1000000001 - cm-ota2/booking-processor 2026-01-10-11 '1000000001'
+[04:02:22] [16] DONE t_kb_cm-ota2_booking-processor_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:22] [17] RUN  t_kb_cm-ota2_booking-processor_2026-01-10-12_1000000001 - cm-ota2/booking-processor 2026-01-10-12 '1000000001'
+[04:02:23] [17] DONE t_kb_cm-ota2_booking-processor_2026-01-10-12_1000000001 rc=1 lines=0
+[04:02:23] [18] RUN  t_kb_cm-ota2_booking-processor_2026-01-10-13_1000000001 - cm-ota2/booking-processor 2026-01-10-13 '1000000001'
+[04:02:23] [18] DONE t_kb_cm-ota2_booking-processor_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:23] [19] RUN  t_kb_cm-ota2_booking-job_2026-01-10-11_OTA2-1000000001 - cm-ota2/booking-job 2026-01-10-11 'OTA2-1000000001'
+[04:02:23] [19] DONE t_kb_cm-ota2_booking-job_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:23] [20] RUN  t_kb_cm-ota2_booking-job_2026-01-10-12_OTA2-1000000001 - cm-ota2/booking-job 2026-01-10-12 'OTA2-1000000001'
+[04:02:23] [20] DONE t_kb_cm-ota2_booking-job_2026-01-10-12_OTA2-1000000001 rc=1 lines=0
+[04:02:23] [21] RUN  t_kb_cm-ota2_booking-job_2026-01-10-13_OTA2-1000000001 - cm-ota2/booking-job 2026-01-10-13 'OTA2-1000000001'
+[04:02:23] [21] DONE t_kb_cm-ota2_booking-job_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:23] [22] RUN  t_kb_cm-ota2_booking-job_2026-01-10-11_1000000001 - cm-ota2/booking-job 2026-01-10-11 '1000000001'
+[04:02:23] [22] DONE t_kb_cm-ota2_booking-job_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:23] [23] RUN  t_kb_cm-ota2_booking-job_2026-01-10-12_1000000001 - cm-ota2/booking-job 2026-01-10-12 '1000000001'
+[04:02:23] [23] DONE t_kb_cm-ota2_booking-job_2026-01-10-12_1000000001 rc=1 lines=0
+[04:02:23] [24] RUN  t_kb_cm-ota2_booking-job_2026-01-10-13_1000000001 - cm-ota2/booking-job 2026-01-10-13 '1000000001'
+[04:02:23] [24] DONE t_kb_cm-ota2_booking-job_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:23] [25] RUN  t_kb_cm-ota2_avail-api_2026-01-10-11_OTA2-1000000001 - cm-ota2/avail-api 2026-01-10-11 'OTA2-1000000001'
+[04:02:23] [25] DONE t_kb_cm-ota2_avail-api_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:23] [26] RUN  t_kb_cm-ota2_avail-api_2026-01-10-12_OTA2-1000000001 - cm-ota2/avail-api 2026-01-10-12 'OTA2-1000000001'
+[04:02:23] [26] DONE t_kb_cm-ota2_avail-api_2026-01-10-12_OTA2-1000000001 rc=1 lines=0
+[04:02:23] [27] RUN  t_kb_cm-ota2_avail-api_2026-01-10-13_OTA2-1000000001 - cm-ota2/avail-api 2026-01-10-13 'OTA2-1000000001'
+[04:02:23] [27] DONE t_kb_cm-ota2_avail-api_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:23] [28] RUN  t_kb_cm-ota2_avail-api_2026-01-10-11_1000000001 - cm-ota2/avail-api 2026-01-10-11 '1000000001'
+[04:02:23] [28] DONE t_kb_cm-ota2_avail-api_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:23] [29] RUN  t_kb_cm-ota2_avail-api_2026-01-10-12_1000000001 - cm-ota2/avail-api 2026-01-10-12 '1000000001'
+[04:02:23] [29] DONE t_kb_cm-ota2_avail-api_2026-01-10-12_1000000001 rc=1 lines=0
+[04:02:23] [30] RUN  t_kb_cm-ota2_avail-api_2026-01-10-13_1000000001 - cm-ota2/avail-api 2026-01-10-13 '1000000001'
+[04:02:23] [30] DONE t_kb_cm-ota2_avail-api_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:23] [31] RUN  t_kb_cm-ota2_property-api_2026-01-10-11_OTA2-1000000001 - cm-ota2/property-api 2026-01-10-11 'OTA2-1000000001'
+[04:02:23] [31] DONE t_kb_cm-ota2_property-api_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:23] [32] RUN  t_kb_cm-ota2_property-api_2026-01-10-12_OTA2-1000000001 - cm-ota2/property-api 2026-01-10-12 'OTA2-1000000001'
+[04:02:23] [32] DONE t_kb_cm-ota2_property-api_2026-01-10-12_OTA2-1000000001 rc=1 lines=0
+[04:02:23] [33] RUN  t_kb_cm-ota2_property-api_2026-01-10-13_OTA2-1000000001 - cm-ota2/property-api 2026-01-10-13 'OTA2-1000000001'
+[04:02:23] [33] DONE t_kb_cm-ota2_property-api_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:24] [34] RUN  t_kb_cm-ota2_property-api_2026-01-10-11_1000000001 - cm-ota2/property-api 2026-01-10-11 '1000000001'
+[04:02:24] [34] DONE t_kb_cm-ota2_property-api_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:24] [35] RUN  t_kb_cm-ota2_property-api_2026-01-10-12_1000000001 - cm-ota2/property-api 2026-01-10-12 '1000000001'
+[04:02:24] [35] DONE t_kb_cm-ota2_property-api_2026-01-10-12_1000000001 rc=1 lines=0
+[04:02:24] [36] RUN  t_kb_cm-ota2_property-api_2026-01-10-13_1000000001 - cm-ota2/property-api 2026-01-10-13 '1000000001'
+[04:02:24] [36] DONE t_kb_cm-ota2_property-api_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:24] [anchor] LOCKED live arrival 2026-01-10-12 (typed 2026-01-10 h12, drift 0h) - downstream stages scan anchor +/-1h
+[04:02:24] [37] RUN  t_pms_pms-hub_booking-api_2026-01-10-11_OTA2-1000000001 - pms-hub/booking-api 2026-01-10-11 'OTA2-1000000001'
+[04:02:24] [37] DONE t_pms_pms-hub_booking-api_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:24] [38] RUN  t_pms_pms-hub_booking-api_2026-01-10-12_OTA2-1000000001 - pms-hub/booking-api 2026-01-10-12 'OTA2-1000000001'
+[04:02:24] [38] DONE t_pms_pms-hub_booking-api_2026-01-10-12_OTA2-1000000001 rc=0 lines=1
+[04:02:24] [39] RUN  t_pms_pms-hub_booking-api_2026-01-10-13_OTA2-1000000001 - pms-hub/booking-api 2026-01-10-13 'OTA2-1000000001'
+[04:02:24] [39] DONE t_pms_pms-hub_booking-api_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:24] [40] RUN  t_pms_pms-hub_booking-api_2026-01-10-11_1000000001 - pms-hub/booking-api 2026-01-10-11 '1000000001'
+[04:02:24] [40] DONE t_pms_pms-hub_booking-api_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:24] [41] RUN  t_pms_pms-hub_booking-api_2026-01-10-12_1000000001 - pms-hub/booking-api 2026-01-10-12 '1000000001'
+[04:02:24] [41] DONE t_pms_pms-hub_booking-api_2026-01-10-12_1000000001 rc=0 lines=1
+[04:02:24] [42] RUN  t_pms_pms-hub_booking-api_2026-01-10-13_1000000001 - pms-hub/booking-api 2026-01-10-13 '1000000001'
+[04:02:24] [42] DONE t_pms_pms-hub_booking-api_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:24] [43] RUN  t_pms_pms-hub_pms-booking-events_2026-01-10-11_OTA2-1000000001 - pms-hub/pms-booking-events 2026-01-10-11 'OTA2-1000000001'
+[04:02:24] [43] DONE t_pms_pms-hub_pms-booking-events_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:24] [44] RUN  t_pms_pms-hub_pms-booking-events_2026-01-10-12_OTA2-1000000001 - pms-hub/pms-booking-events 2026-01-10-12 'OTA2-1000000001'
+[04:02:24] [44] DONE t_pms_pms-hub_pms-booking-events_2026-01-10-12_OTA2-1000000001 rc=1 lines=0
+[04:02:24] [45] RUN  t_pms_pms-hub_pms-booking-events_2026-01-10-13_OTA2-1000000001 - pms-hub/pms-booking-events 2026-01-10-13 'OTA2-1000000001'
+[04:02:24] [45] DONE t_pms_pms-hub_pms-booking-events_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:24] [46] RUN  t_pms_pms-hub_pms-booking-events_2026-01-10-11_1000000001 - pms-hub/pms-booking-events 2026-01-10-11 '1000000001'
+[04:02:24] [46] DONE t_pms_pms-hub_pms-booking-events_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:24] [47] RUN  t_pms_pms-hub_pms-booking-events_2026-01-10-12_1000000001 - pms-hub/pms-booking-events 2026-01-10-12 '1000000001'
+[04:02:25] [47] DONE t_pms_pms-hub_pms-booking-events_2026-01-10-12_1000000001 rc=1 lines=0
+[04:02:25] [48] RUN  t_pms_pms-hub_pms-booking-events_2026-01-10-13_1000000001 - pms-hub/pms-booking-events 2026-01-10-13 '1000000001'
+[04:02:25] [48] DONE t_pms_pms-hub_pms-booking-events_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:25] [49] SKIP t_pms_pms-hub_booking-api_2026-01-10-11_OTA2-1000000001 (done)
+[04:02:25] [50] SKIP t_pms_pms-hub_booking-api_2026-01-10-12_OTA2-1000000001 (done)
+[04:02:25] [51] SKIP t_pms_pms-hub_booking-api_2026-01-10-13_OTA2-1000000001 (done)
+[04:02:25] [52] SKIP t_pms_pms-hub_booking-api_2026-01-10-11_1000000001 (done)
+[04:02:25] [53] SKIP t_pms_pms-hub_booking-api_2026-01-10-12_1000000001 (done)
+[04:02:25] [54] SKIP t_pms_pms-hub_booking-api_2026-01-10-13_1000000001 (done)
+[04:02:25] [55] SKIP t_pms_pms-hub_pms-booking-events_2026-01-10-11_OTA2-1000000001 (done)
+[04:02:25] [56] SKIP t_pms_pms-hub_pms-booking-events_2026-01-10-12_OTA2-1000000001 (done)
+[04:02:25] [57] SKIP t_pms_pms-hub_pms-booking-events_2026-01-10-13_OTA2-1000000001 (done)
+[04:02:25] [58] SKIP t_pms_pms-hub_pms-booking-events_2026-01-10-11_1000000001 (done)
+[04:02:25] [59] SKIP t_pms_pms-hub_pms-booking-events_2026-01-10-12_1000000001 (done)
+[04:02:25] [60] SKIP t_pms_pms-hub_pms-booking-events_2026-01-10-13_1000000001 (done)
+[04:02:25] [61] RUN  t_pms_pms-hub_hub-booking-events_2026-01-10-11_OTA2-1000000001 - pms-hub/hub-booking-events 2026-01-10-11 'OTA2-1000000001'
+[04:02:25] [61] DONE t_pms_pms-hub_hub-booking-events_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:25] [62] RUN  t_pms_pms-hub_hub-booking-events_2026-01-10-12_OTA2-1000000001 - pms-hub/hub-booking-events 2026-01-10-12 'OTA2-1000000001'
+[04:02:25] [62] DONE t_pms_pms-hub_hub-booking-events_2026-01-10-12_OTA2-1000000001 rc=1 lines=0
+[04:02:25] [63] RUN  t_pms_pms-hub_hub-booking-events_2026-01-10-13_OTA2-1000000001 - pms-hub/hub-booking-events 2026-01-10-13 'OTA2-1000000001'
+[04:02:25] [63] DONE t_pms_pms-hub_hub-booking-events_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:25] [64] RUN  t_pms_pms-hub_hub-booking-events_2026-01-10-11_1000000001 - pms-hub/hub-booking-events 2026-01-10-11 '1000000001'
+[04:02:25] [64] DONE t_pms_pms-hub_hub-booking-events_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:25] [65] RUN  t_pms_pms-hub_hub-booking-events_2026-01-10-12_1000000001 - pms-hub/hub-booking-events 2026-01-10-12 '1000000001'
+[04:02:25] [65] DONE t_pms_pms-hub_hub-booking-events_2026-01-10-12_1000000001 rc=1 lines=0
+[04:02:25] [66] RUN  t_pms_pms-hub_hub-booking-events_2026-01-10-13_1000000001 - pms-hub/hub-booking-events 2026-01-10-13 '1000000001'
+[04:02:25] [66] DONE t_pms_pms-hub_hub-booking-events_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:25] [67] RUN  t_pms_pms-cm-bridge_state-sync-api_2026-01-10-11_OTA2-1000000001 - pms-cm-bridge/state-sync-api 2026-01-10-11 'OTA2-1000000001'
+[04:02:25] [67] DONE t_pms_pms-cm-bridge_state-sync-api_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:25] [68] RUN  t_pms_pms-cm-bridge_state-sync-api_2026-01-10-12_OTA2-1000000001 - pms-cm-bridge/state-sync-api 2026-01-10-12 'OTA2-1000000001'
+[04:02:25] [68] DONE t_pms_pms-cm-bridge_state-sync-api_2026-01-10-12_OTA2-1000000001 rc=1 lines=0
+[04:02:25] [69] RUN  t_pms_pms-cm-bridge_state-sync-api_2026-01-10-13_OTA2-1000000001 - pms-cm-bridge/state-sync-api 2026-01-10-13 'OTA2-1000000001'
+[04:02:25] [69] DONE t_pms_pms-cm-bridge_state-sync-api_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:25] [70] RUN  t_pms_pms-cm-bridge_state-sync-api_2026-01-10-11_1000000001 - pms-cm-bridge/state-sync-api 2026-01-10-11 '1000000001'
+[04:02:25] [70] DONE t_pms_pms-cm-bridge_state-sync-api_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:25] [71] RUN  t_pms_pms-cm-bridge_state-sync-api_2026-01-10-12_1000000001 - pms-cm-bridge/state-sync-api 2026-01-10-12 '1000000001'
+[04:02:26] [71] DONE t_pms_pms-cm-bridge_state-sync-api_2026-01-10-12_1000000001 rc=1 lines=0
+[04:02:26] [72] RUN  t_pms_pms-cm-bridge_state-sync-api_2026-01-10-13_1000000001 - pms-cm-bridge/state-sync-api 2026-01-10-13 '1000000001'
+[04:02:26] [72] DONE t_pms_pms-cm-bridge_state-sync-api_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:26] [73] RUN  t_pms_pms-cm-bridge_booking-api_2026-01-10-11_OTA2-1000000001 - pms-cm-bridge/booking-api 2026-01-10-11 'OTA2-1000000001'
+[04:02:26] [73] DONE t_pms_pms-cm-bridge_booking-api_2026-01-10-11_OTA2-1000000001 rc=1 lines=0
+[04:02:26] [74] RUN  t_pms_pms-cm-bridge_booking-api_2026-01-10-12_OTA2-1000000001 - pms-cm-bridge/booking-api 2026-01-10-12 'OTA2-1000000001'
+[04:02:26] [74] DONE t_pms_pms-cm-bridge_booking-api_2026-01-10-12_OTA2-1000000001 rc=1 lines=0
+[04:02:26] [75] RUN  t_pms_pms-cm-bridge_booking-api_2026-01-10-13_OTA2-1000000001 - pms-cm-bridge/booking-api 2026-01-10-13 'OTA2-1000000001'
+[04:02:26] [75] DONE t_pms_pms-cm-bridge_booking-api_2026-01-10-13_OTA2-1000000001 rc=1 lines=0
+[04:02:26] [76] RUN  t_pms_pms-cm-bridge_booking-api_2026-01-10-11_1000000001 - pms-cm-bridge/booking-api 2026-01-10-11 '1000000001'
+[04:02:26] [76] DONE t_pms_pms-cm-bridge_booking-api_2026-01-10-11_1000000001 rc=1 lines=0
+[04:02:26] [77] RUN  t_pms_pms-cm-bridge_booking-api_2026-01-10-12_1000000001 - pms-cm-bridge/booking-api 2026-01-10-12 '1000000001'
+[04:02:26] [77] DONE t_pms_pms-cm-bridge_booking-api_2026-01-10-12_1000000001 rc=1 lines=0
+[04:02:26] [78] RUN  t_pms_pms-cm-bridge_booking-api_2026-01-10-13_1000000001 - pms-cm-bridge/booking-api 2026-01-10-13 '1000000001'
+[04:02:26] [78] DONE t_pms_pms-cm-bridge_booking-api_2026-01-10-13_1000000001 rc=1 lines=0
+[04:02:26] [79] RUN  harvest - join-key harvest
+[04:02:26] [79] DONE harvest rc=0 lines=1
+[04:02:26] [80] RUN  follow - follow harvested keys
+[04:02:28] [80] DONE follow rc=0 lines=55
+[04:02:28] [81] RUN  crossref - cross-run property correlation
+[04:02:28] [81] DONE crossref rc=0 lines=0
+[04:02:28] [82] RUN  fallback_icase - case-insensitive ref sweep (fallback)
+[04:02:28] [82] DONE fallback_icase rc=0 lines=1
+[04:02:28] [83] RUN  verdict - stage classification + verdict
+[04:02:28] [83] DONE verdict rc=0 lines=12
+[04:02:28] [84] RUN  next_actions - conditional next actions
+[04:02:28] [84] DONE next_actions rc=0 lines=2
+[kb-write] backup saved: <sandbox>/home_trace-fidelity/pms_tools/kb/connector_kb.json.bak.20261116T040229Z.119336
+[kb-write] updated (channels.OTA2 +1 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
+[fidelity] ota=<sandbox>/home_trace-fidelity/pms_tools/runs/mock-trace-fidelity/raw/ota_doc.xml pms=<sandbox>/home_trace-fidelity/pms_tools/runs/mock-trace-fidelity/raw/pms_doc.xml
+FIDELITY REPORT
+ota_doc=<sandbox>/home_trace-fidelity/pms_tools/runs/mock-trace-fidelity/raw/ota_doc.xml
+pms_doc=<sandbox>/home_trace-fidelity/pms_tools/runs/mock-trace-fidelity/raw/pms_doc.xml
+
+rate.amount_after_tax -> pms.amount        PRESERVED    220.00 -> 220.00
+rate.amount_before_tax                     DROPPED      200.00 -> (absent)
+rate.currency                              PRESERVED    EUR -> EUR
+room.code                                  PRESERVED    DBL -> DBL
+rate.code                                  PRESERVED    BAR -> BAR
+guest.names                                PRESERVED    ['Alex'] -> ['Alex']
+stay.dates                                 PRESERVED    ('2026-02-14', '2026-02-16') -> ('2026-02-14', '2026-02-16')
+rate.taxes[]                               DROPPED      20.00 -> (absent)
+
+VERDICTS:
+  - CONFIG_IGNORED: PMS doc carries the after-tax amount while a before-tax amount existed at source
+  - TAX_BREAKDOWN_DROPPED: 1 tax lines at source, none in the PMS doc
+  - FIELD_DROPPED: rate.amount_before_tax (200.00 -> (absent))
+  - FIELD_DROPPED: rate.taxes[] (20.00 -> (absent))
+== DONE 2026-11-16T04:02:29Z - results: <sandbox>/home_trace-fidelity/pms_tools/runs/mock-trace-fidelity ==
+fetch: cd ~/pms_tools/runs && zip -r mock-trace-fidelity.zip 'mock-trace-fidelity' -x '__MACOSX*'
+=============================================================
+  [PASS] exit 0, no python traceback
+  [PASS] echoToken harvested by trace
+  [PASS] OTA doc auto-fetched (notify-gateway by echoToken)
+  [PASS] PMS doc auto-fetched (booking-api by hubBookingUuid)
+  [PASS] CONFIG_IGNORED verdict (PMS got after-tax amount)
+  [PASS] TAX_BREAKDOWN_DROPPED verdict
+  [PASS] before-tax amount reported DROPPED
+
+================ scenario: ari-manual  (PT_TASKS='ari') ================
+exit=0  backend calls=10
+==================== VERBOSE MODE REPORT ====================
+--- [Backend calls (mock_calls.log)] ---
+ls cm-ota2 *
+grep cm avail-api-ra 2026-01-12-10 33333333-4444-4555-8666-777777777777
+grep cm avail-api-ra 2026-01-12-09 33333333-4444-4555-8666-777777777777
+grep portal-property gui-gateway 2026-01-12-09 3c3c3c3c-1111-4222-8333-944455550003
+grep cm-ota2 avail-api 2026-01-12-08 LA-778899
+grep cm-ota2 avail-api 2026-01-12-09 LA-778899
+grep cm-ota2 avail-api 2026-01-12-10 LA-778899
+grep cm-ota2 avail-gateway 2026-01-12-08 LA-778899
+grep cm-ota2 avail-gateway 2026-01-12-09 LA-778899
+grep cm-ota2 avail-gateway 2026-01-12-10 LA-778899
+--- [verdict.json] ---
+{
+ "mode": "ari",
+ "reached": [
+  "SOURCE",
+  "CM_PERSIST",
+  "CHANNEL_PUSH",
+  "OTA_ACK"
+ ],
+ "missing": [],
+ "na": [
+  "INGEST"
+ ],
+ "attributions": {
+  "systems": [
+   "platform"
+  ],
+  "clients": [
+   "webcm"
+  ],
+  "actors": [
+   "jane.doe@demo-hotel.test"
+  ]
+ },
+ "value_events": 1,
+ "failure_codes": {},
+ "terminal": null,
+ "hits": 2,
+ "context_files": 0
+}--- [ari_evidence.tsv] ---
+ts	kind	originSystem	client	flowToken	roomRateKey	values	dates	app
+2026-01-12T09:14:05	TARGET_EVENT	platform	webcm	3c3c3c3c-1111-4222-8333-944455550003	RRK-DBL-BAR	129.00	2026-02-14	t_ari_inv_cm_avail-api-ra_2026-01-12-09
+--- [ari_actors.txt] ---
+jane.doe@demo-hotel.test
+--- [GOAL_VERDICT.md] ---
+# GOAL VERDICT - rate-mismatch
+
+**VALUE_ATTRIBUTED** - origin + CM persistence proven; answer who/what/when from the Attribution section.
+--- [REPORT.md] ---
+# ARI MODE v0.9.9-oss - case mock-ari-manual
+- hotel=33333333-4444-4555-8666-777777777777 propkey= membership=LA-778899 hotelier= channel=OTA2 booking=none
+- targets: values='129.00' stay_dates='2026-02-14' rate_code= room_code=
+- inventory sweep: anchor_mode=booking from 2026-01-12-10 backward to 2026-01-11, region(s)=ra rb, key=33333333-4444-4555-8666-777777777777; stopped per guardrail - no auto-expansion.
+- INGEST leg: N/A - origin is platform/manual (or no SET evidence); no PMS push in the chain
+- CHANNEL_PUSH leg: apps=cm-ota2/avail-api cm-ota2/avail-gateway  patterns=LA-778899 (chained/bounded; OTA ack behaviour is channel-specific - verify per KB before claiming non-receipt)
+- BILLING leg: skipped (PT_BILLING_FROM empty)
+- ARI_SERIES leg: skipped (no propkey)
+
+## ARI VERDICT (synthesized 2026-11-16T04:02:31Z)
+
+### Attribution (who/what set the value)
+- source system(s) on SET lines: **platform** (client: webcm), first at 2026-01-12T09:14:05
+- acting user(s) (portal-property gui-gateway): **jane.doe@demo-hotel.test**
+- reading: value set **manually/bulk in Platform** by the user above - no PMS involvement in this chain
+
+### Gates
+- [x] **SOURCE**
+- [~] INGEST - N/A (manual origin: no PMS ingest leg exists)
+- [x] **CM_PERSIST**
+- [x] **CHANNEL_PUSH**
+- [x] **OTA_ACK**
+
+### Value events (target value + suspect stay date on the same line)
+- `2026-01-12T09:14:05` values=129.00 dates=2026-02-14 sys=platform tok=3c3c3c3c-1111-4222-8333-944455550003
+
+### Elimination ledger
+- coverage: 20 stage(s) run, 11 empty, 9 with hits
+
+- goal verdict (rate-mismatch): GOAL_VERDICT.md
+--- [NEXT_ACTIONS.md] ---
+# NEXT ACTIONS (ari mode)
+
+1. **Manual change confirmed**: jane.doe@demo-hotel.test set the value(s) in Platform at 2026-01-12T09:14:05. Provide the customer the audit lines (ts, user, values, dates) from REPORT.md; no PMS or integration was involved.
+2. **Customer-facing answer**: the value CM holds and pushed matches the SOURCE event(s) above - answer who/what/when from the Attribution section; the multiplier math only explains the channel-displayed amount, not the base rate origin
+--- [run log] ---
+== PMS TOOL PASTE v0.9.9-oss ==
+[fetch] backend: <repo>/backends/s3search.py (S3S_ROOT=<sandbox>/logs) | archive: <repo>/backends/s3grep.py
+[kb] 0.9.7 @ <sandbox>/home_ari-manual/pms_tools/kb/connector_kb.json (PT_KB_FILE=connector_kb.json) channels=[OTA1 OTA2 OTA3 OTA4] pms=[PMSA_XML PMSA_REST LEGACYPMS CLOUDPMS]
+[window] booking ts=2026-01-12T10:00:00 taken AS-IS (log timeline); tz_offset=-6 informational (property platform tz), NOT applied; uncertain=1 fanout=+/-3
+[goal] PT_GOAL=rate-mismatch -> tasks='ari'
+[goal] PREFLIGHT INPUT CONTRACT - all required anchors present
+== PMS TOOL PASTE v0.9.9-oss - case=mock-ari-manual tasks='ari' mode=run goal='rate-mismatch' ==
+[ari] case=mock-ari-manual window=2026-01-11..2026-01-12 at=2026-01-12T10:00:00 values='129.00' dates='2026-02-14' src=auto
+[04:02:30] [resolve] sys=cm-ota2 from KB app paths (authoritative; catalog name-match skipped)
+[04:02:30] [resolve] KB module OTA2: sys=cm-ota2 apps=cm-ota2/booking-gateway cm-ota2/avail-gateway cm-ota2/booking-processor cm-ota2/booking-job cm-ota2/avail-api cm-ota2/property-api
+[04:02:30] [resolve] pool for cm-ota2 (7 apps, verified listing): avail-api avail-gateway booking-gateway booking-job booking-processor notify-gateway property-api
+[04:02:30] [resolve] channel system: cm-ota2
+[04:02:30] [ari] anchor_mode=booking at=2026-01-12-10 region(s)=ra rb - backward-only, bounded to 2026-01-11
+[04:02:30] [ari] sweep break_on=target
+[04:02:30] [1] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-10 - cm/avail-api-ra 2026-01-12-10 '33333333-4444-4555-8666-777777777777'
+[04:02:30] [1] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-10 rc=1 lines=0
+[04:02:30] [ari] 2026-01-12-10: context/consumption only - continuing backward
+[04:02:30] [2] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-09 - cm/avail-api-ra 2026-01-12-09 '33333333-4444-4555-8666-777777777777'
+[04:02:30] [2] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-09 rc=0 lines=1
+[04:02:30] [ari] TARGET hour found at 2026-01-12-09 - stopping sweep
+[04:02:30] [ari] inventory evidence hour(s): 2026-01-12-09 
+[04:02:30] [3] RUN  ari_filter - classify inventory SET evidence
+[04:02:30] [3] DONE ari_filter rc=0 lines=2
+[04:02:30] [4] RUN  ari_attribute - platform attribution (gui-gateway -> user email)
+[04:02:30] [4] DONE ari_attribute rc=0 lines=3
+[04:02:30] [5] RUN  ari_ingest - PMS/CloudPMS ingest leg (if push origin)
+[04:02:30] [5] DONE ari_ingest rc=0 lines=1
+[04:02:30] [6] RUN  ari_push - channel push leg (CM -> OTA)
+[04:02:31] [6] DONE ari_push rc=0 lines=14
+[04:02:31] [7] RUN  ari_push_lgcy - LGCY ChannelRelay ARI push leg (legacy-stack partitions)
+[04:02:31] [7] DONE ari_push_lgcy rc=0 lines=0
+[04:02:31] [8] RUN  ari_lgcy_report - LGCY ARI push report
+[04:02:31] [8] DONE ari_lgcy_report rc=0 lines=0
+[04:02:31] [9] RUN  ari_bridge_values - CloudPMS bridge pushed values (propkey)
+[04:02:31] [9] DONE ari_bridge_values rc=0 lines=1
+[04:02:31] [10] RUN  ari_billing - billing-service status trace (suspend/reactivate timeline)
+[04:02:31] [10] DONE ari_billing rc=0 lines=0
+[04:02:31] [11] RUN  ari_series - ARI presence day-series (bridge, before+after booking)
+[04:02:31] [11] DONE ari_series rc=0 lines=0
+[04:02:31] [12] RUN  ari_booking_xml - booking XML pull (channel source)
+[04:02:31] [12] DONE ari_booking_xml rc=0 lines=1
+[04:02:31] [13] RUN  ari_booking_xml_lgcy - LGCY booking XML fallback
+[04:02:31] [13] DONE ari_booking_xml_lgcy rc=0 lines=0
+[04:02:31] [14] RUN  ari_verdict - ari gates + attribution + next actions
+[04:02:31] [14] DONE ari_verdict rc=0 lines=18
+[04:02:31] [15] RUN  ari_goal_verdict - goal verdict matrix (rate-mismatch)
+[04:02:31] [15] DONE ari_goal_verdict rc=0 lines=1
+[kb-write] backup saved: <sandbox>/home_ari-manual/pms_tools/kb/connector_kb.json.bak.20261116T040231Z.120462
+[kb-write] updated (channels.OTA2 +0 apps, pms.CLOUDPMS +0 apps, history appended; 1 .bak kept)
+[04:02:31] [16] RUN  crossref - cross-run property correlation
+[04:02:31] [16] DONE crossref rc=0 lines=0
+[ari] done - report: <sandbox>/home_ari-manual/pms_tools/runs/mock-ari-manual/REPORT.md
+== DONE 2026-11-16T04:02:31Z - results: <sandbox>/home_ari-manual/pms_tools/runs/mock-ari-manual ==
+fetch: cd ~/pms_tools/runs && zip -r mock-ari-manual.zip 'mock-ari-manual' -x '__MACOSX*'
+=============================================================
+  [PASS] exit 0, no python traceback
+  [PASS] goal input contract satisfied
+  [PASS] target-hour sweep stopped at 2026-01-12-09
+  [PASS] SET line classified TARGET_EVENT (value+date)
+  [PASS] actor resolved via gui-gateway flowToken
+  [PASS] gates SOURCE,CM_PERSIST,CHANNEL_PUSH,OTA_ACK lit
+  [PASS] INGEST is N/A for a manual origin
+  [PASS] GOAL_VERDICT = VALUE_ATTRIBUTED
+  [PASS] NEXT_ACTIONS names the user
+  [PASS] KB write-back: push-leg app confirmed
+
+================ scenario: ari-pms  (PT_TASKS='ari') ================
+exit=0  backend calls=31
+==================== VERBOSE MODE REPORT ====================
+--- [Backend calls (mock_calls.log)] ---
+ls cm-ota2 *
+grep cm avail-api-ra 2026-01-12-18 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-17 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-16 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-15 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-14 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-13 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-12 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-11 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-10 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-09 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-08 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-07 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-06 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-05 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-04 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-03 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-02 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-01 44444444-5555-4666-8777-888888888888
+grep cm avail-api-ra 2026-01-12-00 44444444-5555-4666-8777-888888888888
+grep cm avail-api-rb 2026-01-12-18 44444444-5555-4666-8777-888888888888
+grep cm avail-api-rb 2026-01-12-17 44444444-5555-4666-8777-888888888888
+grep pms-cm-bridge avail-sync 2026-01-12-* PK-445566
+grep pms-cm-bridge avail-sync 2026-01-12-16 PK-445566
+grep pms-cm-bridge avail-sync 2026-01-12-17 PK-445566
+grep pms-cm-bridge avail-sync 2026-01-12-18 PK-445566
+grep pms-cm-bridge state-sync-api 2026-01-12-16 PK-445566
+grep pms-cm-bridge state-sync-api 2026-01-12-17 PK-445566
+grep pms-cm-bridge state-sync-api 2026-01-12-18 PK-445566
+grep pms-cm-bridge avail-sync 2026-01-12-* PK-445566
+grep pms-cm-bridge state-sync-api 2026-01-12-* PK-445566
+--- [verdict.json] ---
+{
+ "mode": "ari",
+ "reached": [
+  "SOURCE",
+  "INGEST",
+  "CM_PERSIST"
+ ],
+ "missing": [
+  "CHANNEL_PUSH",
+  "OTA_ACK"
+ ],
+ "na": [],
+ "attributions": {
+  "systems": [
+   "CLOUDPMS"
+  ],
+  "clients": [],
+  "actors": []
+ },
+ "value_events": 0,
+ "failure_codes": {},
+ "terminal": null,
+ "hits": 1,
+ "context_files": 0
+}--- [ari_evidence.tsv] ---
+ts	kind	originSystem	client	flowToken	roomRateKey	values	dates	app
+2026-01-12T17:40:00	partial	CLOUDPMS		4d4d4d4d-1111-4222-8333-944455550004		3	2026-02-20	t_ari_inv_cm_avail-api-rb_2026-01-12-17
+--- [REPORT.md] ---
+# ARI MODE v0.9.9-oss - case mock-ari-pms
+- hotel=44444444-5555-4666-8777-888888888888 propkey=PK-445566 membership= hotelier= channel=OTA2 booking=none
+- targets: values='3' stay_dates='2026-02-20' rate_code= room_code=
+- inventory sweep: anchor_mode=booking from 2026-01-12-18 backward to 2026-01-12, region(s)=ra rb, key=44444444-5555-4666-8777-888888888888; stopped per guardrail - no auto-expansion.
+- INGEST leg: pms-cm-bridge/avail-sync swept by propkey=PK-445566 (batch tokens: free-text search)
+- BRIDGE_VALUES leg: pms-cm-bridge/avail-sync by propkey=PK-445566 at chained hour(s):2026-01-12-16 2026-01-12-17 2026-01-12-18  - raw/t_ari_bv_*
+- BRIDGE_STATE leg: pms-cm-bridge/state-sync-api by propkey at chained hour(s):2026-01-12-16 2026-01-12-17 2026-01-12-18  - raw/t_ari_bridge_* (empty = bridge silent; cross-ref billing-service/events)
+- BILLING leg: skipped (PT_BILLING_FROM empty)
+- ARI_SERIES leg: pms-cm-bridge/avail-sync + state-sync-api day-wildcards 2026-01-12..2026-01-12 by propkey=PK-445566 - presence/absence per day; avail-api day blobs refused by design (non-viable live)
+
+### ARI presence timeline (pms-cm-bridge, by day)
+- 2026-01-12 inv=1 (2026-01-12T17:39:30..2026-01-12T17:39:30) core=0
+(0 = no bridge traffic that day = suspension-window candidate; confirm against the BILLING transitions before concluding - absence in one system is not proof)
+
+## ARI VERDICT (synthesized 2026-11-16T04:02:35Z)
+
+### Attribution (who/what set the value)
+- source system(s) on SET lines: **CLOUDPMS** (client: ?), first at 2026-01-12T17:40:00
+- reading: value arrived via **PMS/CloudPMS push** - the PMS provider's own send log (echoToken/flowToken) is the upstream evidence
+
+### Gates
+- [x] **SOURCE**
+- [x] **INGEST**
+- [x] **CM_PERSIST**
+- [ ] CHANNEL_PUSH - no evidence
+- [ ] OTA_ACK - no evidence
+
+### Elimination ledger
+- coverage: 41 stage(s) run, 30 empty, 11 with hits
+- CHANNEL_PUSH empty: no channel-side lines for the swept identifiers in window - either no push happened (check mapping/derived-rate settings) or identifiers don't join (fill PT_CHANNEL_HOTEL_UUID)
+
+--- [NEXT_ACTIONS.md] ---
+# NEXT ACTIONS (ari mode)
+
+1. **PMS push origin**: the upstream proof is the PMS provider's send log - ask the PMS for the echoToken/message id of the update covering these dates; the INGEST evidence (if any) is in raw/t_ari_ing_*
+2. **Push gap**: CM holds the value but no channel push was found - check channel mapping + derived rate/multiplier config, and consider a manual CM -> channel re-push (touch) for the affected dates
+--- [run log] ---
+== PMS TOOL PASTE v0.9.9-oss ==
+[fetch] backend: <repo>/backends/s3search.py (S3S_ROOT=<sandbox>/logs) | archive: <repo>/backends/s3grep.py
+[kb] 0.9.7 @ <sandbox>/home_ari-pms/pms_tools/kb/connector_kb.json (PT_KB_FILE=connector_kb.json) channels=[OTA1 OTA2 OTA3 OTA4] pms=[PMSA_XML PMSA_REST LEGACYPMS CLOUDPMS]
+[window] booking ts=2026-01-12T18:00:00 taken AS-IS (log timeline); tz_offset=-6 informational (property platform tz), NOT applied; uncertain=1 fanout=+/-3
+== PMS TOOL PASTE v0.9.9-oss - case=mock-ari-pms tasks='ari' mode=run goal='custom' ==
+[ari] case=mock-ari-pms window=2026-01-12..2026-01-12 at=2026-01-12T18:00:00 values='3' dates='2026-02-20' src=auto
+[04:02:32] [resolve] sys=cm-ota2 from KB app paths (authoritative; catalog name-match skipped)
+[04:02:33] [resolve] KB module OTA2: sys=cm-ota2 apps=cm-ota2/booking-gateway cm-ota2/avail-gateway cm-ota2/booking-processor cm-ota2/booking-job cm-ota2/avail-api cm-ota2/property-api
+[04:02:33] [resolve] pool for cm-ota2 (7 apps, verified listing): avail-api avail-gateway booking-gateway booking-job booking-processor notify-gateway property-api
+[04:02:33] [resolve] channel system: cm-ota2
+[04:02:33] [ari] anchor_mode=booking at=2026-01-12-18 region(s)=ra rb - backward-only, bounded to 2026-01-12
+[04:02:33] [ari] sweep break_on=any
+[04:02:33] [1] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-18 - cm/avail-api-ra 2026-01-12-18 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [1] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-18 rc=1 lines=0
+[04:02:33] [2] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-17 - cm/avail-api-ra 2026-01-12-17 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [2] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-17 rc=1 lines=0
+[04:02:33] [3] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-16 - cm/avail-api-ra 2026-01-12-16 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [3] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-16 rc=1 lines=0
+[04:02:33] [4] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-15 - cm/avail-api-ra 2026-01-12-15 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [4] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-15 rc=1 lines=0
+[04:02:33] [5] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-14 - cm/avail-api-ra 2026-01-12-14 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [5] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-14 rc=1 lines=0
+[04:02:33] [6] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-13 - cm/avail-api-ra 2026-01-12-13 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [6] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-13 rc=1 lines=0
+[04:02:33] [7] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-12 - cm/avail-api-ra 2026-01-12-12 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [7] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-12 rc=1 lines=0
+[04:02:33] [8] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-11 - cm/avail-api-ra 2026-01-12-11 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [8] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-11 rc=1 lines=0
+[04:02:33] [9] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-10 - cm/avail-api-ra 2026-01-12-10 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [9] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-10 rc=1 lines=0
+[04:02:33] [10] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-09 - cm/avail-api-ra 2026-01-12-09 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [10] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-09 rc=1 lines=0
+[04:02:33] [11] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-08 - cm/avail-api-ra 2026-01-12-08 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [11] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-08 rc=1 lines=0
+[04:02:33] [12] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-07 - cm/avail-api-ra 2026-01-12-07 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [12] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-07 rc=1 lines=0
+[04:02:33] [13] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-06 - cm/avail-api-ra 2026-01-12-06 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [13] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-06 rc=1 lines=0
+[04:02:33] [14] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-05 - cm/avail-api-ra 2026-01-12-05 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [14] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-05 rc=1 lines=0
+[04:02:33] [15] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-04 - cm/avail-api-ra 2026-01-12-04 '44444444-5555-4666-8777-888888888888'
+[04:02:33] [15] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-04 rc=1 lines=0
+[04:02:33] [16] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-03 - cm/avail-api-ra 2026-01-12-03 '44444444-5555-4666-8777-888888888888'
+[04:02:34] [16] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-03 rc=1 lines=0
+[04:02:34] [17] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-02 - cm/avail-api-ra 2026-01-12-02 '44444444-5555-4666-8777-888888888888'
+[04:02:34] [17] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-02 rc=1 lines=0
+[04:02:34] [18] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-01 - cm/avail-api-ra 2026-01-12-01 '44444444-5555-4666-8777-888888888888'
+[04:02:34] [18] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-01 rc=1 lines=0
+[04:02:34] [19] RUN  t_ari_inv_cm_avail-api-ra_2026-01-12-00 - cm/avail-api-ra 2026-01-12-00 '44444444-5555-4666-8777-888888888888'
+[04:02:34] [19] DONE t_ari_inv_cm_avail-api-ra_2026-01-12-00 rc=1 lines=0
+[04:02:34] [20] RUN  t_ari_inv_cm_avail-api-rb_2026-01-12-18 - cm/avail-api-rb 2026-01-12-18 '44444444-5555-4666-8777-888888888888'
+[04:02:34] [20] DONE t_ari_inv_cm_avail-api-rb_2026-01-12-18 rc=1 lines=0
+[04:02:34] [21] RUN  t_ari_inv_cm_avail-api-rb_2026-01-12-17 - cm/avail-api-rb 2026-01-12-17 '44444444-5555-4666-8777-888888888888'
+[04:02:34] [21] DONE t_ari_inv_cm_avail-api-rb_2026-01-12-17 rc=0 lines=1
+[04:02:34] [ari] inventory evidence hour(s): 2026-01-12-17 
+[04:02:34] [22] RUN  ari_filter - classify inventory SET evidence
+[04:02:34] [22] DONE ari_filter rc=0 lines=1
+[04:02:34] [23] RUN  ari_attribute - platform attribution (gui-gateway -> user email)
+[04:02:34] [23] DONE ari_attribute rc=0 lines=1
+[04:02:34] [24] RUN  ari_ingest - PMS/CloudPMS ingest leg (if push origin)
+[04:02:34] [24] DONE ari_ingest rc=0 lines=3
+[04:02:34] [25] RUN  ari_push - channel push leg (CM -> OTA)
+[04:02:34] [25] DONE ari_push rc=0 lines=1
+[04:02:34] [26] RUN  ari_push_lgcy - LGCY ChannelRelay ARI push leg (legacy-stack partitions)
+[04:02:34] [26] DONE ari_push_lgcy rc=0 lines=0
+[04:02:34] [27] RUN  ari_lgcy_report - LGCY ARI push report
+[04:02:34] [27] DONE ari_lgcy_report rc=0 lines=0
+[04:02:34] [28] RUN  ari_bridge_values - CloudPMS bridge pushed values (propkey)
+[04:02:34] [28] DONE ari_bridge_values rc=0 lines=13
+[04:02:34] [29] RUN  ari_billing - billing-service status trace (suspend/reactivate timeline)
+[04:02:34] [29] DONE ari_billing rc=0 lines=0
+[04:02:34] [30] RUN  ari_series - ARI presence day-series (bridge, before+after booking)
+[04:02:35] [30] DONE ari_series rc=0 lines=5
+[04:02:35] [31] RUN  ari_booking_xml - booking XML pull (channel source)
+[04:02:35] [31] DONE ari_booking_xml rc=0 lines=1
+[04:02:35] [32] RUN  ari_booking_xml_lgcy - LGCY booking XML fallback
+[04:02:35] [32] DONE ari_booking_xml_lgcy rc=0 lines=0
+[04:02:35] [33] RUN  ari_verdict - ari gates + attribution + next actions
+[04:02:35] [33] DONE ari_verdict rc=0 lines=16
+[04:02:35] [34] RUN  crossref - cross-run property correlation
+[04:02:35] [34] DONE crossref rc=0 lines=0
+[ari] done - report: <sandbox>/home_ari-pms/pms_tools/runs/mock-ari-pms/REPORT.md
+== DONE 2026-11-16T04:02:35Z - results: <sandbox>/home_ari-pms/pms_tools/runs/mock-ari-pms ==
+fetch: cd ~/pms_tools/runs && zip -r mock-ari-pms.zip 'mock-ari-pms' -x '__MACOSX*'
+=============================================================
+  [PASS] exit 0, no python traceback
+  [PASS] SET found in region rb after ra came back empty
+  [PASS] origin CLOUDPMS -> ingest leg auto-selected (bridge)
+  [PASS] gates SOURCE,INGEST,CM_PERSIST lit
+  [PASS] CHANNEL_PUSH honestly missing (no channel given)
+  [PASS] NEXT_ACTIONS points at the PMS send log
+
+================ scenario: goal-contract  (PT_TASKS='ari') ================
+exit=2  backend calls=0
+==================== VERBOSE MODE REPORT ====================
+--- [Backend calls (mock_calls.log)] ---
+(none)
+--- [run log] ---
+== PMS TOOL PASTE v0.9.9-oss ==
+[fetch] backend: <repo>/backends/s3search.py (S3S_ROOT=<sandbox>/logs) | archive: <repo>/backends/s3grep.py
+[kb] 0.9.7 @ <sandbox>/home_goal-contract/pms_tools/kb/connector_kb.json (PT_KB_FILE=connector_kb.json) channels=[OTA1 OTA2 OTA3 OTA4] pms=[PMSA_XML PMSA_REST LEGACYPMS CLOUDPMS]
+[window] booking ts=2026-01-10T12:00:00 taken AS-IS (log timeline); tz_offset=-6 informational (property platform tz), NOT applied; uncertain=1 fanout=+/-3
+[goal] PT_GOAL=overbooking -> tasks='ari'
+[goal] PREFLIGHT INPUT CONTRACT - MISSING required anchors: PT_PROPERTY_ID PT_HOTEL_UUID PT_STAY_DATES
+[goal] REFUSING to run with gaps. Fill the blanks and re-paste (or set PT_ALLOW_PARTIAL=1; every gap lands in the REPORT as UNVERIFIED, never as absence).
+=============================================================
+  [PASS] refuses with exit 2
+  [PASS] lists the missing anchors
+  [PASS] no backend call was made
+
+================ scenario: guiattrib  (PT_TASKS='guiattrib') ================
+exit=0  backend calls=6
+==================== VERBOSE MODE REPORT ====================
+--- [Backend calls (mock_calls.log)] ---
+grep hub-channel-link link-api 2026-01-13-14 55555555-6666-4777-8888-999999999999
+query hub-channel-link link-api 2026-01-13-14 s.flowToken = "6b6b6b6b-1111-4222-8333-944455550001"
+query portal-property * 2026-01-13-14 s.flowToken = "6b6b6b6b-1111-4222-8333-944455550001"
+query portal-property gui-gateway 2026-01-13-14 s.email = "sam.ops@demo-hotel.test"
+query platform-session api 2026-01-13-14 s.propertyId = "PK-445566"
+query cm entity-api-ra 2026-01-13-14 s.message LIKE "%LA-778899%"
+--- [gui_tokens.txt] ---
+      1 6b6b6b6b-1111-4222-8333-944455550001
+--- [GUIACTORS.md] ---
+# GUI attribution - per-token actor table
+
+| flowToken | component | actor email | client IP | mutation | success ts (UTC) |
+|---|---|---|---|---|---|
+| 6b6b6b6b-1111-4222-8333-944455550001 | gui-gateway | sam.ops@demo-hotel.test | 198.51.100.23 | Mutation setChannelProperty | 2026-01-13T14:22:10.300Z |
+
+## mutations by GUI user in the hour (email sweep)
+- Mutation setChannelProperty
+
+## entity-api audit writes matching rate modification
+- 2026-01-13T14:22:11.000Z audit: Rate modification applied listing LA-778899 factor changed
+--- [REPORT.md] ---
+
+## GUI attribution (2026-01-13-14 UTC)
+- link-api burst: 1 lines, 1 tokens (gui_tokens.txt)
+- per-token actor table: GUIACTORS.md (email + client IP + mutation per flowToken)
+--- [run log] ---
+== PMS TOOL PASTE v0.9.9-oss ==
+[fetch] backend: <repo>/backends/s3search.py (S3S_ROOT=<sandbox>/logs) | archive: <repo>/backends/s3grep.py
+[kb] 0.9.7 @ <sandbox>/home_guiattrib/pms_tools/kb/connector_kb.json (PT_KB_FILE=connector_kb.json) channels=[OTA1 OTA2 OTA3 OTA4] pms=[PMSA_XML PMSA_REST LEGACYPMS CLOUDPMS]
+[window] booking ts=2026-01-10T12:00:00 taken AS-IS (log timeline); tz_offset=-6 informational (property platform tz), NOT applied; uncertain=1 fanout=+/-3
+== PMS TOOL PASTE v0.9.9-oss - case=mock-guiattrib tasks='guiattrib' mode=run goal='custom' ==
+[04:02:36] [1] RUN  gui_burst - link-api 2026-01-13-14 by channelPropertyUuid
+[04:02:36] [1] DONE gui_burst rc=0 lines=0
+[04:02:36] [2] RUN  gui_tok_1 - link-api token 6b6b6b6b
+[04:02:36] [2] DONE gui_tok_1 rc=0 lines=1
+[04:02:36] [3] RUN  gui_tok_1_pp - portal-property token 6b6b6b6b
+[04:02:36] [3] DONE gui_tok_1_pp rc=0 lines=2
+[04:02:36] [4] RUN  gui_sweep - gui-gateway ops by sam.ops@demo-hotel.test
+[04:02:36] [4] DONE gui_sweep rc=0 lines=2
+[04:02:36] [5] RUN  gui_session - platform session 2026-01-13-14
+[04:02:36] [5] DONE gui_session rc=0 lines=1
+[04:02:36] [6] RUN  gui_core - entity-api audit write (ra)
+[04:02:36] [6] DONE gui_core rc=0 lines=1
+[gui] GUIACTORS.md: 1 tokens, 1 user mutations, 1 core audit hits
+== DONE 2026-11-16T04:02:36Z - results: <sandbox>/home_guiattrib/pms_tools/runs/mock-guiattrib ==
+fetch: cd ~/pms_tools/runs && zip -r mock-guiattrib.zip 'mock-guiattrib' -x '__MACOSX*'
+=============================================================
+  [PASS] exit 0, no python traceback
+  [PASS] flowToken extracted from the link-api burst
+  [PASS] actor email + client IP in GUIACTORS.md
+  [PASS] mutation setChannelProperty attributed
+  [PASS] platform session read captured
+  [PASS] entity-api audit write matched
+  [PASS] summary counts 1 token / 1 mutation / 1 audit hit
+
+================ scenario: kb-test  (PT_TASKS='kb-test') ================
+exit=0  backend calls=30
+==================== VERBOSE MODE REPORT ====================
+--- [Backend calls (mock_calls.log)] ---
+ls * *
+ls cloudpms booking-api
+ls cloudpms deferred-jobs
+ls cloudpms main-ra
+ls cloudpms payments-hub-sync
+ls cm-ota2 avail-api
+ls cm-ota2 avail-gateway
+ls cm-ota2 booking-gateway
+ls cm-ota2 booking-job
+ls cm-ota2 booking-processor
+ls cm-ota2 property-api
+ls cm-ota3 avail-gateway
+ls cm-ota3 booking-gateway
+ls cm-ota3 booking-processor
+ls cm-ota4 avail-api
+ls cm-ota4 avail-gateway
+ls cm-ota4 booking-processor
+ls cm-ota4 listing-proxy
+ls cm-ota4 msg-mapper
+ls cm-ota4 notify-gateway
+ls cm-ota4 notify-processor
+ls hub-pmsa-rest *
+ls hub-pmsa-xml *
+ls pms-cm-bridge avail-sync
+ls pms-cm-bridge booking-api
+ls pms-cm-bridge state-sync-api
+ls pms-hub booking-api
+ls pms-hub hub-booking-events
+ls pms-hub pms-booking-events
+ls xengine *
+--- [run log] ---
+== PMS TOOL PASTE v0.9.9-oss ==
+[fetch] backend: <repo>/backends/s3search.py (S3S_ROOT=<sandbox>/logs) | archive: <repo>/backends/s3grep.py
+[kb] 0.9.7 @ <sandbox>/home_kb-test/pms_tools/kb/connector_kb.json (PT_KB_FILE=connector_kb.json) channels=[OTA1 OTA2 OTA3 OTA4] pms=[PMSA_XML PMSA_REST LEGACYPMS CLOUDPMS]
+[window] booking ts=2026-01-10T12:00:00 taken AS-IS (log timeline); tz_offset=-6 informational (property platform tz), NOT applied; uncertain=1 fanout=+/-3
+== PMS TOOL PASTE v0.9.9-oss - case=mock-kb-test tasks='kb-test' mode=run goal='custom' ==
+[kb-test] module reachability + catalog cross-check + anchor probes
+[kb-test] channel OTA1: apps live=0 stale=0 verified=2026-01-01 history=0
+[kb-test] channel OTA2: apps live=6 stale=0 verified=2026-01-01 history=0
+[kb-test] channel OTA3: apps live=2 stale=0 verified=2026-01-01 history=0
+[kb-test] channel OTA4: apps live=4 stale=3 verified=2026-01-01 history=0
+[kb-test]   STALE? cm-ota4/listing-proxy (not in live catalog)
+[kb-test]   STALE? cm-ota4/msg-mapper (not in live catalog)
+[kb-test]   STALE? cm-ota4/notify-processor (not in live catalog)
+[kb-test] pm PMSA_XML: apps live=3 stale=1 verified=2026-01-01 history=0
+[kb-test]   STALE? hub-pmsa-xml (not in live catalog)
+[kb-test] pm PMSA_REST: apps live=3 stale=2 verified=2026-01-01 history=0
+[kb-test]   STALE? hub-pmsa-rest (not in live catalog)
+[kb-test]   STALE? xengine (not in live catalog)
+[kb-test] pm LEGACYPMS: apps live=3 stale=0 verified=2026-01-01 history=0
+[kb-test] pm CLOUDPMS: apps live=8 stale=2 verified=2026-01-01 history=0
+[kb-test]   STALE? cloudpms/deferred-jobs (not in live catalog)
+[kb-test]   STALE? cloudpms/payments-hub-sync (not in live catalog)
+[kb-test] failure_signatures: 7 loaded (ARI_NO_ROOM_RATE_SYNC, ARI_XENGINE_DATA_LOSS, ERR_CONVERSION_UNMAPPED_ROOM_RATE, ERR_INTERNAL_PROCESSING_FAILED, ERR_PMS_BUSINESS_ERRORS, PMS_BRIDGE_SYNC_DISABLED, XENGINE_INVALID_CREDENTIALS)
+[kb-test] STALE?  cloudpms/booking-api
+[kb-test] STALE?  cloudpms/deferred-jobs
+[kb-test] LIVE  cloudpms/main-ra
+[kb-test] STALE?  cloudpms/payments-hub-sync
+[kb-test] LIVE  cm-ota2/avail-api
+[kb-test] LIVE  cm-ota2/avail-gateway
+[kb-test] LIVE  cm-ota2/booking-gateway
+[kb-test] LIVE  cm-ota2/booking-job
+[kb-test] LIVE  cm-ota2/booking-processor
+[kb-test] LIVE  cm-ota2/property-api
+[kb-test] STALE?  cm-ota3/avail-gateway
+[kb-test] STALE?  cm-ota3/booking-gateway
+[kb-test] STALE?  cm-ota3/booking-processor
+[kb-test] STALE?  cm-ota4/avail-api
+[kb-test] STALE?  cm-ota4/avail-gateway
+[kb-test] STALE?  cm-ota4/booking-processor
+[kb-test] STALE?  cm-ota4/listing-proxy
+[kb-test] STALE?  cm-ota4/msg-mapper
+[kb-test] STALE?  cm-ota4/notify-gateway
+[kb-test] STALE?  cm-ota4/notify-processor
+[kb-test] STALE?  hub-pmsa-rest
+[kb-test] STALE?  hub-pmsa-xml
+[kb-test] LIVE  pms-cm-bridge/avail-sync
+[kb-test] LIVE  pms-cm-bridge/booking-api
+[kb-test] LIVE  pms-cm-bridge/state-sync-api
+[kb-test] LIVE  pms-hub/booking-api
+[kb-test] LIVE  pms-hub/hub-booking-events
+[kb-test] LIVE  pms-hub/pms-booking-events
+[kb-test] STALE?  xengine
+== DONE 2026-11-16T04:02:39Z - results: <sandbox>/home_kb-test/pms_tools/runs/mock-kb-test ==
+fetch: cd ~/pms_tools/runs && zip -r mock-kb-test.zip 'mock-kb-test' -x '__MACOSX*'
+=============================================================
+  [PASS] exit 0, no python traceback
+  [PASS] every KB module reported
+  [PASS] fixture app reported LIVE
+  [PASS] app absent from the archive reported STALE?
+  [PASS] failure signatures counted
+
+================ scenario: bridgeflush  (PT_TASKS='bridgeflush') ================
+exit=0  backend calls=17
+==================== VERBOSE MODE REPORT ====================
+--- [Backend calls (mock_calls.log)] ---
+grep cloudpms main-ra 2026-01-14-11 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-10 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-09 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-08 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-07 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-06 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-05 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-04 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-03 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-02 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-01 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-00 properties/880011/flush
+grep cloudpms main-ra 2026-01-14-10 7a7a7a7a-1111-4222-8333-944455550002
+grep pms-cm-bridge hub-sync-api 2026-01-14-10 PK-445566
+grep cloudpms entity-api 2026-01-14-10 PK-445566
+grep portal-property gui-gateway 2026-01-14-10 RR-9001
+grep portal-property job-runner 2026-01-14-10 RR-9001
+--- [state/bfl_analysis.json] ---
+{
+ "flushes": [
+  {
+   "token": "7a7a7a7a-1111-4222-8333-944455550002",
+   "hours": [
+    "2026-01-14-10"
+   ],
+   "user": "ops.lead@demo-hotel.test",
+   "overall": [
+    "500"
+   ],
+   "sublegs": {
+    "inventory": [
+     "204"
+    ],
+    "core": [
+     "204"
+    ],
+    "hub-pms-sync": [
+     "500"
+    ]
+   }
+  }
+ ],
+ "sync": {
+  "lines": 2,
+  "update_failed_400": 1,
+  "flush_failed": 1,
+  "tokens": [
+   "7a7a7a7a-1111-4222-8333-944455550002"
+  ],
+  "other_msgs": []
+ },
+ "rate_puts": {
+  "RT-DBL/RR-1001": {
+   "200": 1
+  },
+  "RT-DBL/RR-1002": {
+   "200": 1
+  },
+  "RT-DBL/RR-9001": {
+   "400": 1
+  }
+ },
+ "type_puts": {
+  "RT-DBL": {
+   "200": 1
+  }
+ },
+ "culprit_ids": [
+  "RT-DBL/RR-9001"
+ ],
+ "ok_rate_count": 2,
+ "failing_subleg": "hub-pms-sync",
+ "token_chain": [
+  "7a7a7a7a-1111-4222-8333-944455550002"
+ ]
+}--- [REPORT.md] ---
+- bridge-flush goal: chain cloudpms/main-ra -> pms-cm-bridge/hub-sync-api -> cloudpms/entity-api; inputs = propkey+CloudPMS id+window; culprit DERIVED from logs (R27)
+- ORIGIN leg: platform apps by DERIVED culprit ids (RT-DBL/RR-9001) at flush hours (bounded; set PT_FLUSH_ORIGIN_DAY=1 for the full day)
+
+## BRIDGE-FLUSH VERDICT (derived from evidence; inputs were propkey + window only)
+
+### Gates
+- [x] FLUSH_TRIGGERED
+- [x] SUBLEG_ISOLATED
+- [x] CM_PMS_SYNC_400
+- [x] CORE_BLOCKER_DERIVED
+- [x] FAIL_FAST_SINGLE
+- [x] TOKEN_CHAIN
+- [x] ACTOR_CAPTURED
+- [x] ORIGIN_FOUND
+
+### Flush runs (1)
+- 7a7a7a7a-1111-4222-8333-944455550002 overall=500 user=ops.lead@demo-hotel.test | core=204 hub-pms-sync=500 inventory=204
+
+### Failing sub-leg: hub-pms-sync (inventory/core 204)
+- hub-sync: setRoomRate-failed-400 lines=1, flush wrappers=1, tokens chained to cloudpms/main=7a7a7a7a-1111-4222-8333-944455550002
+- **Blocking room rate (DERIVED): RT-DBL/RR-9001**
+  - GET http://cloudpms-entity-api/properties/PK-445566/room-types/RT-DBL/room-rates/RR-9001  (400 body is logged nowhere - inspect values directly)
+- Fail-fast pattern CONFIRMED: 2 distinct room rates updated 200, exactly 1 rejected - one invalid rate blocks the whole property flush.
+- Room-TYPE updates 200 while room-RATE 400s (type endpoints healthy: RT-DBL) - rate-level validation, not a type problem.
+- ORIGIN: 1 platform-side hit(s) for the culprit id - see raw/t_bfl_origin_* (who/when set the invalid values).
+--- [run log] ---
+== PMS TOOL PASTE v0.9.9-oss ==
+[fetch] backend: <repo>/backends/s3search.py (S3S_ROOT=<sandbox>/logs) | archive: <repo>/backends/s3grep.py
+[kb] 0.9.7 @ <sandbox>/home_bridgeflush/pms_tools/kb/connector_kb.json (PT_KB_FILE=connector_kb.json) channels=[OTA1 OTA2 OTA3 OTA4] pms=[PMSA_XML PMSA_REST LEGACYPMS CLOUDPMS]
+[window] booking ts=2026-01-14T11:00:00 taken AS-IS (log timeline); tz_offset=-6 informational (property platform tz), NOT applied; uncertain=1 fanout=+/-3
+[goal] PT_GOAL=bridge-flush -> tasks='bridgeflush'
+[goal] PREFLIGHT INPUT CONTRACT - all required anchors present
+== PMS TOOL PASTE v0.9.9-oss - case=mock-bridgeflush tasks='bridgeflush' mode=run goal='bridge-flush' ==
+[04:02:39] [1] RUN  bridgeflush_triggers - cloudpms/main flush triggers + per-request sub-leg status
+[04:02:40] [1] DONE bridgeflush_triggers rc=0 lines=27
+[04:02:40] [2] RUN  bridgeflush_syncapi - hub-sync-api error confirmation (chained)
+[04:02:40] [2] DONE bridgeflush_syncapi rc=0 lines=2
+[04:02:40] [3] RUN  bridgeflush_coreapi - cloudpms/entity-api room-rate PUT enumeration (chained)
+[04:02:40] [3] DONE bridgeflush_coreapi rc=0 lines=2
+[04:02:40] [4] RUN  bridgeflush_classify - evidence classification (derived facts)
+[04:02:40] [4] DONE bridgeflush_classify rc=0 lines=1
+[04:02:40] [5] RUN  bridgeflush_origin - culprit origin scan (platform apps, derived ids)
+[04:02:40] [5] DONE bridgeflush_origin rc=0 lines=4
+[04:02:40] [6] RUN  bridgeflush_verdict - bridge-flush verdict (fail-fast / blocker / signatures)
+[04:02:40] [6] DONE bridgeflush_verdict rc=0 lines=10
+== DONE 2026-11-16T04:02:40Z - results: <sandbox>/home_bridgeflush/pms_tools/runs/mock-bridgeflush ==
+fetch: cd ~/pms_tools/runs && zip -r mock-bridgeflush.zip 'mock-bridgeflush' -x '__MACOSX*'
+=============================================================
+  [PASS] exit 0, no python traceback
+  [PASS] flush trigger found at 2026-01-14-10
+  [PASS] failing sub-leg isolated: hub-pms-sync
+  [PASS] culprit room rate derived: RT-DBL/RR-9001
+  [PASS] token chained cloudpms/main <-> hub-sync-api
+  [PASS] all 8 bridge-flush gates lit
+  [PASS] fail-fast single-blocker pattern confirmed
+  [PASS] actor + origin captured
+
+================ scenario: unknown-task  (PT_TASKS='bogus') ================
+exit=0  backend calls=0
+==================== VERBOSE MODE REPORT ====================
+--- [Backend calls (mock_calls.log)] ---
+(none)
+--- [run log] ---
+== PMS TOOL PASTE v0.9.9-oss ==
+[fetch] backend: <repo>/backends/s3search.py (S3S_ROOT=<sandbox>/logs) | archive: <repo>/backends/s3grep.py
+[kb] 0.9.7 @ <sandbox>/home_unknown-task/pms_tools/kb/connector_kb.json (PT_KB_FILE=connector_kb.json) channels=[OTA1 OTA2 OTA3 OTA4] pms=[PMSA_XML PMSA_REST LEGACYPMS CLOUDPMS]
+[window] booking ts=2026-01-10T12:00:00 taken AS-IS (log timeline); tz_offset=-6 informational (property platform tz), NOT applied; uncertain=1 fanout=+/-3
+== PMS TOOL PASTE v0.9.9-oss - case=mock-unknown-task tasks='bogus' mode=run goal='custom' ==
+[tasks] unknown task 'bogus' (trace|fidelity|kb-test|ari|guiattrib|bridgeflush)
+== DONE 2026-11-16T04:02:41Z - results: <sandbox>/home_unknown-task/pms_tools/runs/mock-unknown-task ==
+fetch: cd ~/pms_tools/runs && zip -r mock-unknown-task.zip 'mock-unknown-task' -x '__MACOSX*'
+=============================================================
+  [PASS] unknown task named in the output
+
+RESULT: PASS (all scenarios, all modes)

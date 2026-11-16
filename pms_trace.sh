@@ -1166,7 +1166,7 @@ KIND_RES = [
     ("hubBookingUuid", re.compile(r'hubBookingUuid"?\s*[:=]\s*"?(?P<v>[0-9a-f-]{36})')),
     ("hubPmsPropertyUuid",    re.compile(r'hubPmsPropertyUuid"?\s*[:=]\s*"?(?P<v>[0-9a-f-]{36})')),
     ("pmsBookingId",  re.compile(r'pmsBookingId"?\s*[:=]\s*"?(?P<v>[A-Za-z0-9-]{4,40})')),
-    ("echoToken",         re.compile(r'[Ee]handoffToken\\?"?\s*[:=]?\s*\\?"?(?P<v>[A-Za-z0-9-]{4,40})')),
+    ("echoToken",         re.compile(r'[Ee]choToken\\?"?\s*[:=]?\s*\\?"?(?P<v>[A-Za-z0-9-]{4,40})')),
     ("listing_id",        re.compile(r'listing_id"?\s*[:=]\s*"?(?P<v>\d{4,20})')),
     ("pmsType",           re.compile(r'pmsType"?\s*[:=]\s*"?(?P<v>[A-Z0-9_]{2,20})')),
     ("sourceAgentCode",  re.compile(r'sourceAgentCode"?\s*[:=]\s*"?(?P<v>[A-Z0-9]{2,5})')),
@@ -1867,7 +1867,7 @@ for sect in ("channels", "pms"):
         apps = []
         la = m.get("log_apps") or {}
         for k, v in (la.items() if isinstance(la, dict) else []):
-            if v and not k.startswith("_"): apps.append(v)
+            if v and not k.startswith("_"): apps += v if isinstance(v, list) else [v]
         apps += m.get("delivery_apps", []) + m.get("inventory_apps", []) + m.get("other_apps", [])
         live, stale = [], []
         for a in sorted(set(apps)):
@@ -1886,7 +1886,7 @@ for sect in ('channels','pms'):
   for m in kb[sect].values():
     la=m.get('log_apps') or {}
     for k,v in (la.items() if isinstance(la,dict) else []):
-      if v and not k.startswith('_'): s.add(v)
+      if v and not k.startswith('_'): s.update(v if isinstance(v,list) else [v])
     for v in m.get('delivery_apps',[])+m.get('inventory_apps',[])+m.get('other_apps',[]): s.add(v)
 print(' '.join(sorted(s)))"); do
     local sys comp got st
@@ -2561,7 +2561,11 @@ pt_guiattrib() {
   if [ -n "$PT_CHANNEL_HOTEL_UUID" ]; then
     pt_run_stage gui_burst "link-api $dh by channelPropertyUuid" \
       "pt_fetch 'hub-channel-link/link-api' '$dh' '$PT_CHANNEL_HOTEL_UUID' '$burst'"
-    jq -r '.flowToken // empty' "$burst" 2>/dev/null | sort | uniq -c | sort -rn > "$PT_RUN_DIR/gui_tokens.txt"
+    python3 -c 'import json,sys
+for l in open(sys.argv[1], errors="replace"):
+    try: t = json.loads(l).get("flowToken")
+    except Exception: continue
+    if t: print(t)' "$burst" 2>/dev/null | sort | uniq -c | sort -rn > "$PT_RUN_DIR/gui_tokens.txt"   # python, not jq: no extra dependency
     pt_note "- link-api burst: $(wc -l < "$burst" | tr -d ' ') lines, $(wc -l < "$PT_RUN_DIR/gui_tokens.txt" | tr -d ' ') tokens (gui_tokens.txt)"
   else
     pt_log "[gui] no PT_CHANNEL_HOTEL_UUID - burst skipped"; pt_note "- link-api burst: SKIPPED (no channelPropertyUuid)"

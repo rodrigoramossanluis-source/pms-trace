@@ -9,12 +9,20 @@
 #              (Intel Homebrew: /usr/local/bin/bash; MacPorts: /opt/local/bin/bash)
 # HOW TO RUN (Linux):  bash ./run_mock_test.sh
 #
-# What it does: builds a throw-away sandbox with a fixture log archive (one booking
-# travelling channel -> CM -> PMS, a failing booking and a co-tenant decoy), points the
-# REAL reference backends (backends/s3search.py, s3grep.py) at it, runs the real
-# pms_trace.sh and ASSERTS on the results (lit verdict gates, harvested join keys,
-# follow-up hits, failure classification, KB write-back/self-learning, backend contract,
-# ssh:// and s3:// transports via local shims - no network needed). Exit 0 = PASS.
+# What it does: builds a throw-away sandbox with a fixture log archive, points the REAL
+# reference backends (backends/s3search.py, s3grep.py) at it, runs the real pms_trace.sh
+# and ASSERTS on the results - no network needed. Exit 0 = PASS.
+#   trace     : delivered booking, failing booking (conversion), co-tenant decoy, KB
+#               write-back + self-learning (discover -> relearn), ssh:// and s3:// shims
+#   backends  : direct contract checks (ls/grep/query, .gz, unsafe input, transports)
+#   fidelity  : offline docs (all PRESERVED), no docs (honest 'unavailable'), and
+#               trace+fidelity with docs auto-fetched via harvested keys (verdicts)
+#   ari       : manual GUI change attributed to a user (goal rate-mismatch) and a
+#               PMS-push origin with the bridge ingest leg (region rb)
+#   guiattrib : GUI change -> flowToken -> actor email/IP, session read, audit write
+#   kb-test   : every KB module vs the catalog (LIVE / STALE?)
+#   bridgeflush: goal bridge-flush - sub-leg isolation, culprit room rate derived
+#   contracts : goal input contract refusal (exit 2, zero scans), unknown task name
 #
 # OPTIONS (flags or env vars; with no flag/env set you are asked at the console):
 #   -s, --save [FILE]  save the full console output to FILE (default: ./test-reports/
@@ -35,7 +43,7 @@ while [ $# -gt 0 ]; do
     -v|--verbose) VERBOSE=1 ;;
     -k|--keep)    KEEP=1 ;;
     -y|--no-prompt) NO_PROMPT=1 ;;
-    -h|--help)    sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help)    sed -n '2,35p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option: $1 (try --help)"; exit 2 ;;
   esac; shift
 done
@@ -99,8 +107,8 @@ PYRED
 trap finish EXIT
 BIN="$ROOT/bin"; mkdir -p "$BIN"
 if [ "${KEEP:-0}" = "1" ]; then
-  FULL_REPORT="$ROOT/FULL_TEST_REPORT.txt"
-  exec > >(tee -a "$FULL_REPORT") 2>&1
+  KEEP_LOG="$ROOT/FULL_TEST_REPORT.txt"   # raw (unredacted) copy inside the kept sandbox
+  exec > >(tee -a "$KEEP_LOG") 2>&1
 fi
 # GNU tool shims: macOS BSD date/timeout/stat/sed/readlink lack the GNU flags the tool uses.
 for t in date timeout stat sed readlink seq sort; do
@@ -128,6 +136,29 @@ cat > "$FIX" <<'FIXEOF'
 {"_sys":"cm-ota2","_comp":"booking-gateway","@timestamp":"2026-01-10T15:20:01.600Z","level":"INFO","msg":"RESPONSE make_reservation","reservationId":"OTA2-2000000002","statusCode":200,"flowToken":"5e5e5e5e-2222-4333-8444-955566667777"}
 {"_sys":"hub-channel-store","_comp":"booking-api","@timestamp":"2026-01-10T15:20:02.300Z","level":"INFO","msg":"Fetching reservation for delivery","cmBookingId":"OTA2-2000000002","hubBookingUuid":"7d7d7d7d-aaaa-4bbb-8ccc-dddddddddddd","flowToken":"5e5e5e5e-2222-4333-8444-955566667777"}
 {"_sys":"pms-hub","_comp":"pms-booking-events","@timestamp":"2026-01-10T15:20:03.900Z","level":"ERROR","msg":"reservation conversion failed","hubBookingUuid":"7d7d7d7d-aaaa-4bbb-8ccc-dddddddddddd","status":"Error","faultCode":"ERR_CONVERSION_UNMAPPED_ROOM_RATE","flowToken":"5e5e5e5e-2222-4333-8444-955566667777"}
+{"_sys":"cm-ota2","_comp":"notify-gateway","@timestamp":"2026-01-10T12:03:11.700Z","level":"INFO","msg":"OTA notification payload","echoToken":"ECHO-7f3a9c21","payload":"<OTA_HotelResNotifRQ EchoToken=\"ECHO-7f3a9c21\"><RoomType RoomTypeCode=\"DBL\"/><RatePlan RatePlanCode=\"BAR\"/><Total AmountBeforeTax=\"200.00\" AmountAfterTax=\"220.00\" CurrencyCode=\"EUR\"><Taxes><Tax Amount=\"20.00\" Code=\"VAT\" Type=\"Inclusive\"/></Taxes></Total><TimeSpan Start=\"2026-02-14\" End=\"2026-02-16\"/><GivenName>Alex</GivenName></OTA_HotelResNotifRQ>"}
+{"_sys":"pms-hub","_comp":"booking-api","@timestamp":"2026-01-10T12:03:13.300Z","level":"INFO","msg":"PMS document sent","hubBookingUuid":"9c8b7a65-4321-4fed-8cba-0123456789ab","payload":"<Reservation><valueNum>220.00</valueNum><Total CurrencyCode=\"EUR\"/><RoomType RoomTypeCode=\"DBL\"/><RatePlan RatePlanCode=\"BAR\"/><TimeSpan Start=\"2026-02-14\" End=\"2026-02-16\"/><GivenName>Alex</GivenName></Reservation>"}
+{"_sys":"cm","_comp":"avail-api-ra","@timestamp":"2026-01-12T09:14:05.000Z","level":"INFO","message":"SET RATE propertyUuid=33333333-4444-4555-8666-777777777777 roomRateKey=RRK-DBL-BAR date=2026-02-14 value=129.00","originSystem":"platform","client":"webcm","flowToken":"3c3c3c3c-1111-4222-8333-944455550003","roomRateKey":"RRK-DBL-BAR"}
+{"_sys":"portal-property","_comp":"gui-gateway","@timestamp":"2026-01-12T09:14:04.500Z","level":"INFO","msg":"graphql server operation was successful","flowToken":"3c3c3c3c-1111-4222-8333-944455550003","email":"jane.doe@demo-hotel.test","ipAddress":"198.51.100.10"}
+{"_sys":"cm-ota2","_comp":"avail-gateway","@timestamp":"2026-01-12T09:15:20.000Z","level":"INFO","msg":"ARI push rate update listing LA-778899 date 2026-02-14 value 129.00","listingAcctId":"LA-778899","response":"Success","statusCode":200}
+{"_sys":"cm","_comp":"avail-api-rb","@timestamp":"2026-01-12T17:40:00.000Z","level":"INFO","message":"SET AVAIL propertyUuid=44444444-5555-4666-8777-888888888888 date=2026-02-20 avail=3","originSystem":"CLOUDPMS","flowToken":"4d4d4d4d-1111-4222-8333-944455550004"}
+{"_sys":"pms-cm-bridge","_comp":"avail-sync","@timestamp":"2026-01-12T17:39:30.000Z","level":"INFO","msg":"availability batch received","propertyKey":"PK-445566","originFlowTokens":["4d4d4d4d-1111-4222-8333-944455550004"]}
+{"_sys":"hub-channel-link","_comp":"link-api","@timestamp":"2026-01-13T14:22:10.100Z","level":"INFO","msg":"PUT /api/properties/PK-445566/channel-links/55555555-6666-4777-8888-999999999999 200","channelPropertyUuid":"55555555-6666-4777-8888-999999999999","flowToken":"6b6b6b6b-1111-4222-8333-944455550001"}
+{"_sys":"portal-property","_comp":"gui-gateway","@timestamp":"2026-01-13T14:22:09.900Z","level":"INFO","msg":"Mutation setChannelProperty","flowToken":"6b6b6b6b-1111-4222-8333-944455550001","email":"sam.ops@demo-hotel.test","kubernetes":{"labels":{"component":"gui-gateway"}}}
+{"_sys":"portal-property","_comp":"gui-gateway","@timestamp":"2026-01-13T14:22:10.300Z","level":"INFO","msg":"graphql server operation was successful","flowToken":"6b6b6b6b-1111-4222-8333-944455550001","email":"sam.ops@demo-hotel.test","ipAddress":"198.51.100.23","kubernetes":{"labels":{"component":"gui-gateway"}}}
+{"_sys":"platform-session","_comp":"api","@timestamp":"2026-01-13T14:20:00.000Z","level":"INFO","msg":"GET property settings","propertyId":"PK-445566","email":"sam.ops@demo-hotel.test"}
+{"_sys":"cm","_comp":"entity-api-ra","@timestamp":"2026-01-13T14:22:11.000Z","level":"INFO","message":"audit: Rate modification applied listing LA-778899 factor changed"}
+{"_sys":"cloudpms","_comp":"main-ra","@timestamp":"2026-01-14T10:05:00.000Z","level":"INFO","msg":"Started GET \"/properties/880011/flush?type=all\" request_id=7a7a7a7a-1111-4222-8333-944455550002 user=ops.lead@demo-hotel.test"}
+{"_sys":"cloudpms","_comp":"main-ra","@timestamp":"2026-01-14T10:05:01.000Z","level":"INFO","msg":"request_id=7a7a7a7a-1111-4222-8333-944455550002 sub-request type=inventory -> 204 in 120ms"}
+{"_sys":"cloudpms","_comp":"main-ra","@timestamp":"2026-01-14T10:05:02.000Z","level":"INFO","msg":"request_id=7a7a7a7a-1111-4222-8333-944455550002 sub-request type=core -> 204 in 80ms"}
+{"_sys":"cloudpms","_comp":"main-ra","@timestamp":"2026-01-14T10:05:03.000Z","level":"ERROR","msg":"request_id=7a7a7a7a-1111-4222-8333-944455550002 sub-request hub-pms-sync -> 500 in 900ms"}
+{"_sys":"pms-cm-bridge","_comp":"hub-sync-api","@timestamp":"2026-01-14T10:05:02.500Z","level":"ERROR","msg":"setRoomRate failed status=400 property PK-445566 request 7a7a7a7a-1111-4222-8333-944455550002"}
+{"_sys":"pms-cm-bridge","_comp":"hub-sync-api","@timestamp":"2026-01-14T10:05:02.900Z","level":"ERROR","msg":"Flushing property data failed PK-445566 request 7a7a7a7a-1111-4222-8333-944455550002"}
+{"_sys":"cloudpms","_comp":"entity-api","@timestamp":"2026-01-14T10:05:02.100Z","level":"INFO","msg":"PUT /properties/PK-445566/room-types/RT-DBL 200 9ms"}
+{"_sys":"cloudpms","_comp":"entity-api","@timestamp":"2026-01-14T10:05:02.200Z","level":"INFO","msg":"PUT /properties/PK-445566/room-types/RT-DBL/room-rates/RR-1001 200 15ms"}
+{"_sys":"cloudpms","_comp":"entity-api","@timestamp":"2026-01-14T10:05:02.300Z","level":"INFO","msg":"PUT /properties/PK-445566/room-types/RT-DBL/room-rates/RR-1002 200 14ms"}
+{"_sys":"cloudpms","_comp":"entity-api","@timestamp":"2026-01-14T10:05:02.400Z","level":"WARN","msg":"PUT /properties/PK-445566/room-types/RT-DBL/room-rates/RR-9001 400 11ms"}
+{"_sys":"portal-property","_comp":"gui-gateway","@timestamp":"2026-01-14T10:01:00.000Z","level":"INFO","msg":"Mutation setRoomRate roomRate RR-9001 minStay=0","email":"ops.lead@demo-hotel.test"}
 FIXEOF
 
 # ---- log tree: the fixture laid out the way a real archive is ---------------------
@@ -232,7 +263,7 @@ run_case() { # name ref at extra-env...
     PT_FOLLOW=1 PT_GREP_FALLBACK=1 PT_MODE=run PT_SEARCH_TIMEOUT=60 PT_CATALOG_TIMEOUT=60 \
     PT_KB_DIR="$H/pms_tools/kb" PT_KB_FILE=connector_kb.json PT_ON_EXISTS=wipe PT_ON_FINISHED=wipe \
     "$@" bash "$TRACE" < /dev/null > "$H/run.log" 2>&1
-  local rc=$?
+  local rc=$?; RC=$rc
   RUN="$H/pms_tools/runs/mock-$name"; LOG="$H/run.log"
   CALLS=$(grep -c . "$H/mock_calls.log" 2>/dev/null || echo 0); KBLIVE="$H/pms_tools/kb/connector_kb.json"
   echo "trace exit=$rc  backend calls=$CALLS  kb-write: $(grep -h '\[kb-write\] updated' "$LOG" | tail -1)"
@@ -258,7 +289,7 @@ PY
 }
 check() { # description python-expression-over(v, keys, run)
   local d="$1" expr="$2"
-  if KBP="$KBLIVE" KBSRC_="${KBFROM:-$KBSRC}" python3 - "$RUN" "$expr" <<'PY'
+  if KBP="$KBLIVE" KBSRC_="${KBFROM:-$KBSRC}" LOG_="$LOG" RC_="${RC:-0}" python3 - "$RUN" "$expr" <<'PY'
 import json, os, sys, glob
 run, expr = sys.argv[1], sys.argv[2]
 try: v = json.load(open(os.path.join(run, "verdict.json")))
@@ -272,6 +303,14 @@ if os.path.exists(jk):
 nonempty = [os.path.basename(f) for f in glob.glob(os.path.join(run, "raw", "*.out")) if os.path.getsize(f) > 0]
 report = open(os.path.join(run, "REPORT.md")).read() if os.path.exists(os.path.join(run, "REPORT.md")) else ""
 reached = set(v.get("reached", []))
+def txt(rel):  # text of a file in the run dir ("" when absent)
+    p = os.path.join(run, rel)
+    return open(p, errors="replace").read() if os.path.exists(p) else ""
+def js(rel):   # parsed JSON file in the run dir ({} when absent)
+    try: return json.load(open(os.path.join(run, rel)))
+    except Exception: return {}
+log = open(os.environ["LOG_"], errors="replace").read() if os.path.exists(os.environ.get("LOG_", "")) else ""
+rc = int(os.environ.get("RC_", "0"))
 sys.exit(0 if eval(expr) else 1)
 PY
   then echo "  [PASS] $d"; else echo "  [FAIL] $d"; CASE_FAIL=$((CASE_FAIL+1)); fi
@@ -302,7 +341,8 @@ CASE_FAIL=0
 [ -s "$RUN/verdict.json" ] && summ
 check "same gates reached from the written-back KB"           "{'ARRIVAL','ACCEPTANCE','CM_STORE','PMS_RECEIVE','DELIVERY'} <= reached"
 check "loaded the updated KB (history now has 2 runs)"        "len(json.load(open(os.environ['KBP']))['channels']['OTA2']['history']) == 2"
-check "backend calls not higher than first session ($CALLS1)" "$CALLS <= $CALLS1"
+check "KB converged: second session learned no new apps"     "'channels.OTA2 +0 apps' in log"
+echo "  note: backend calls $CALLS1 -> $CALLS (session 1 learned cm-ota2/notify-gateway from an echoToken follow-up hit; session 2 also scans it)"
 [ $CASE_FAIL -gt 0 ] && { TOTAL_FAIL=$((TOTAL_FAIL+CASE_FAIL)); echo "  log tail:"; tail -n 20 "$LOG"; }
 
 # ---- scenario 3: discovery + self-learning (channel module has NO app paths) -----------
@@ -384,5 +424,146 @@ for T in "ssh:ssh://ops@loghost$LOGS" "s3:s3://demo-logs"; do
   [ $CASE_FAIL -gt 0 ] && { TOTAL_FAIL=$((TOTAL_FAIL+CASE_FAIL)); echo "  log tail:"; tail -n 20 "$LOG"; }
 done
 
+# =====================================================================================
+# MODE COVERAGE: every task the dispatcher knows (fidelity, ari, guiattrib, kb-test,
+# bridgeflush) plus goal playbooks - each run against its own fixture slice above.
+# =====================================================================================
+print_mode_report() { # run_dir call_log - verbose: artefacts a mode wrote
+  local run_dir="$1" call_log="$2" f
+  echo "==================== VERBOSE MODE REPORT ===================="
+  echo "--- [Backend calls (mock_calls.log)] ---"; [ -s "$call_log" ] && cat "$call_log" || echo "(none)"
+  for f in verdict.json ari_evidence.tsv ari_actors.txt fidelity_report.txt gui_tokens.txt GUIACTORS.md GOAL_VERDICT.md state/bfl_analysis.json REPORT.md NEXT_ACTIONS.md; do
+    [ -s "$run_dir/$f" ] && { echo "--- [$f] ---"; cat "$run_dir/$f"; }
+  done
+  echo "--- [run log] ---"; cat "$LOG"
+  echo "============================================================="
+}
+run_mode() { # name tasks extra-env...   (no trace defaults: each mode gets only its own inputs)
+  local name="$1" tasks="$2"; shift 2
+  local H="$ROOT/home_$name"; mkdir -p "$H/pms_tools/kb"
+  cp "$KBSRC" "$H/pms_tools/kb/connector_kb.json"
+  echo; echo "================ scenario: $name  (PT_TASKS='$tasks') ================"
+  env HOME="$H" PATH="$PATH" S3S_CALL_LOG="$H/mock_calls.log" \
+    PT_CASE="mock-$name" PT_TASKS="$tasks" PT_DETACH=0 PT_NO_PREFLIGHT=1 PT_SYS_SWEEP=0 PT_MODE=run \
+    PT_SEARCH_TIMEOUT=60 PT_CATALOG_TIMEOUT=60 PT_KB_DIR="$H/pms_tools/kb" PT_KB_FILE=connector_kb.json \
+    PT_ON_EXISTS=wipe PT_ON_FINISHED=wipe \
+    "$@" bash "$TRACE" < /dev/null > "$H/run.log" 2>&1
+  RC=$?
+  RUN="$H/pms_tools/runs/mock-$name"; LOG="$H/run.log"; KBLIVE="$H/pms_tools/kb/connector_kb.json"
+  CALLS=$(grep -c . "$H/mock_calls.log" 2>/dev/null || echo 0)
+  echo "exit=$RC  backend calls=$CALLS"
+  [ "${VERBOSE:-0}" = "1" ] && print_mode_report "$RUN" "$H/mock_calls.log"
+  CASE_FAIL=0
+}
+case_end() { [ $CASE_FAIL -gt 0 ] && { TOTAL_FAIL=$((TOTAL_FAIL+CASE_FAIL)); echo "  log tail:"; tail -n 25 "$LOG"; }; true; }
+NO_TB="'Traceback' not in log"
+
+# ---- fidelity (a): offline documents given as files -> every field PRESERVED -----------
+DOCS="$ROOT/docs"; mkdir -p "$DOCS"
+cat > "$DOCS/ota.xml" <<'XML'
+<OTA_HotelResNotifRQ EchoToken="ECHO-0000"><RoomType RoomTypeCode="DBL"/><RatePlan RatePlanCode="BAR"/><Total AmountAfterTax="220.00" CurrencyCode="EUR"><Taxes><Tax Amount="20.00" Code="VAT" Type="Inclusive"/></Taxes></Total><TimeSpan Start="2026-02-14" End="2026-02-16"/><GivenName>Alex</GivenName></OTA_HotelResNotifRQ>
+XML
+cat > "$DOCS/pms.xml" <<'XML'
+<Reservation><valueNum>220.00</valueNum><Total CurrencyCode="EUR"><Taxes><Tax Amount="20.00" Code="VAT" Type="Inclusive"/></Taxes></Total><RoomType RoomTypeCode="DBL"/><RatePlan RatePlanCode="BAR"/><TimeSpan Start="2026-02-14" End="2026-02-16"/><GivenName>Alex</GivenName></Reservation>
+XML
+run_mode fidelity-files fidelity PT_OTA_FILE="$DOCS/ota.xml" PT_PMS_FILE="$DOCS/pms.xml"
+check "exit 0, no python traceback"                        "rc == 0 and $NO_TB"
+check "fidelity_report.txt written"                        "txt('fidelity_report.txt').startswith('FIDELITY REPORT')"
+check "amount/currency/room/rate/guest/dates/taxes PRESERVED" "txt('fidelity_report.txt').count('PRESERVED') == 7"
+check "no verdicts raised for identical documents"         "txt('fidelity_report.txt').rstrip().endswith('VERDICTS:')"
+case_end
+
+# ---- fidelity (b): no documents and nothing to fetch -> honest 'unavailable' ---------------
+run_mode fidelity-nodocs fidelity
+check "reports docs unavailable instead of guessing"       "'[fidelity] docs unavailable' in log and not txt('fidelity_report.txt')"
+case_end
+
+# ---- trace + fidelity chained: docs auto-fetched via harvested echoToken / hubBookingUuid ---
+run_mode trace-fidelity "trace fidelity" PT_REF=OTA2-1000000001 PT_CHANNEL=OTA2 PT_PMS=CLOUDPMS \
+  PT_AT=2026-01-10T12:00:00 PT_AT_UNCERTAIN=1 PT_FANOUT_HOURS=1 PT_FROM=2026-01-10 PT_TO=2026-01-10 \
+  PT_FULLDAY_FALLBACK=1 PT_FOLLOW=1 PT_GREP_FALLBACK=1
+check "exit 0, no python traceback"                        "rc == 0 and $NO_TB"
+check "echoToken harvested by trace"                       "'ECHO-7f3a9c21' in txt('join_keys.tsv')"
+check "OTA doc auto-fetched (notify-gateway by echoToken)" "'OTA_HotelResNotifRQ' in txt('raw/ota_doc.xml')"
+check "PMS doc auto-fetched (booking-api by hubBookingUuid)" "'<Reservation>' in txt('raw/pms_doc.xml')"
+check "CONFIG_IGNORED verdict (PMS got after-tax amount)"  "'CONFIG_IGNORED' in txt('fidelity_report.txt')"
+check "TAX_BREAKDOWN_DROPPED verdict"                      "'TAX_BREAKDOWN_DROPPED: 1 tax lines' in txt('fidelity_report.txt')"
+check "before-tax amount reported DROPPED"                 "'FIELD_DROPPED: rate.amount_before_tax' in txt('fidelity_report.txt')"
+case_end
+
+# ---- ari (a) via goal playbook rate-mismatch: manual GUI change, attributed to a user -------
+run_mode ari-manual ari PT_GOAL=rate-mismatch PT_CHANNEL=OTA2 PT_HOTEL_UUID=33333333-4444-4555-8666-777777777777 \
+  PT_MEMBERSHIP=LA-778899 PT_TARGET_VALUES=129.00 PT_STAY_DATES=2026-02-14 \
+  PT_AT=2026-01-12T10:00:00 PT_FROM=2026-01-11 PT_TO=2026-01-12 PT_REGION=both PT_SOURCE_SYSTEM=auto
+check "exit 0, no python traceback"                        "rc == 0 and $NO_TB"
+check "goal input contract satisfied"                      "'all required anchors present' in log"
+check "target-hour sweep stopped at 2026-01-12-09"         "'TARGET hour found at 2026-01-12-09' in log"
+check "SET line classified TARGET_EVENT (value+date)"      "'TARGET_EVENT' in txt('ari_evidence.tsv') and v.get('value_events') == 1"
+check "actor resolved via gui-gateway flowToken"           "txt('ari_actors.txt').strip() == 'jane.doe@demo-hotel.test'"
+check "gates SOURCE,CM_PERSIST,CHANNEL_PUSH,OTA_ACK lit"   "{'SOURCE','CM_PERSIST','CHANNEL_PUSH','OTA_ACK'} <= reached"
+check "INGEST is N/A for a manual origin"                  "v.get('na') == ['INGEST']"
+check "GOAL_VERDICT = VALUE_ATTRIBUTED"                    "'VALUE_ATTRIBUTED' in txt('GOAL_VERDICT.md')"
+check "NEXT_ACTIONS names the user"                        "'Manual change confirmed' in txt('NEXT_ACTIONS.md')"
+check "KB write-back: push-leg app confirmed"              "'cm-ota2/avail' in json.dumps(json.load(open(os.environ['KBP']))['channels']['OTA2'])"
+case_end
+
+# ---- ari (b): PMS push origin -> ingest leg on the bridge, region rb, no channel -----------
+run_mode ari-pms ari PT_HOTEL_UUID=44444444-5555-4666-8777-888888888888 PT_PROPERTY_ID=PK-445566 \
+  PT_TARGET_VALUES=3 PT_STAY_DATES=2026-02-20 PT_AT=2026-01-12T18:00:00 PT_FROM=2026-01-12 PT_TO=2026-01-12 \
+  PT_REGION=both PT_SOURCE_SYSTEM=auto
+check "exit 0, no python traceback"                        "rc == 0 and $NO_TB"
+check "SET found in region rb after ra came back empty"    "'avail-api-rb' in txt('ari_evidence.tsv') and 'avail-api-ra' not in txt('ari_evidence.tsv')"
+check "origin CLOUDPMS -> ingest leg auto-selected (bridge)" "'CloudPMS ingest leg' in log"
+check "gates SOURCE,INGEST,CM_PERSIST lit"                 "{'SOURCE','INGEST','CM_PERSIST'} <= reached"
+check "CHANNEL_PUSH honestly missing (no channel given)"   "'CHANNEL_PUSH' in v.get('missing', [])"
+check "NEXT_ACTIONS points at the PMS send log"            "'PMS push origin' in txt('NEXT_ACTIONS.md')"
+case_end
+
+# ---- goal input contract: missing anchors -> refuse before any scan ------------------------
+run_mode goal-contract ari PT_GOAL=overbooking PT_CHANNEL=OTA2
+check "refuses with exit 2"                                "rc == 2 and 'REFUSING to run with gaps' in log"
+check "lists the missing anchors"                          "'PT_HOTEL_UUID' in log and 'PT_STAY_DATES' in log"
+check "no backend call was made"                           "$CALLS == 0"
+case_end
+
+# ---- guiattrib: GUI config change -> token -> actor email/IP + audit write ---------------
+run_mode guiattrib guiattrib PT_GUI_DATE=2026-01-13 PT_GUI_HOUR=14 PT_GUI_USER=sam.ops@demo-hotel.test \
+  PT_CHANNEL_HOTEL_UUID=55555555-6666-4777-8888-999999999999 PT_PROPERTY_ID=PK-445566 PT_MEMBERSHIP=LA-778899 PT_REGION=ra
+check "exit 0, no python traceback"                        "rc == 0 and $NO_TB"
+check "flowToken extracted from the link-api burst"        "'6b6b6b6b-1111-4222-8333-944455550001' in txt('gui_tokens.txt')"
+check "actor email + client IP in GUIACTORS.md"            "'sam.ops@demo-hotel.test' in txt('GUIACTORS.md') and '198.51.100.23' in txt('GUIACTORS.md')"
+check "mutation setChannelProperty attributed"             "'Mutation setChannelProperty' in txt('GUIACTORS.md')"
+check "platform session read captured"                     "'PK-445566' in txt('raw/gui_session.out')"
+check "entity-api audit write matched"                     "'Rate modification applied' in txt('GUIACTORS.md')"
+check "summary counts 1 token / 1 mutation / 1 audit hit"  "'1 tokens, 1 user mutations, 1 core audit hits' in log"
+case_end
+
+# ---- kb-test: KB modules cross-checked against the live catalog --------------------------
+run_mode kb-test kb-test
+check "exit 0, no python traceback"                        "rc == 0 and $NO_TB"
+check "every KB module reported"                           "all(('[kb-test] %s %s:' % (s, c)) in log for s, cs in (('channel', json.load(open(os.environ['KBP']))['channels']), ('pm', json.load(open(os.environ['KBP']))['pms'])) for c in cs)"
+check "fixture app reported LIVE"                          "'[kb-test] LIVE  cm-ota2/booking-gateway' in log"
+check "app absent from the archive reported STALE?"        "'[kb-test] STALE?  xengine' in log"
+check "failure signatures counted"                         "'failure_signatures: %d loaded' % len(json.load(open(os.environ['KBP']))['failure_signatures']) in log"
+case_end
+
+# ---- bridgeflush via goal playbook bridge-flush: culprit room rate DERIVED from logs ---------
+run_mode bridgeflush bridgeflush PT_GOAL=bridge-flush PT_PROPERTY_ID=PK-445566 PT_CLOUDPMS_PROPERTY_ID=880011 \
+  PT_AT=2026-01-14T11:00:00 PT_FROM=2026-01-13 PT_TO=2026-01-14 PT_REGION=ra
+check "exit 0, no python traceback"                        "rc == 0 and $NO_TB"
+check "flush trigger found at 2026-01-14-10"               "'2026-01-14-10' in txt('state/t_bfl_trig_hours.txt')"
+check "failing sub-leg isolated: hub-pms-sync"             "js('state/bfl_analysis.json').get('failing_subleg') == 'hub-pms-sync'"
+check "culprit room rate derived: RT-DBL/RR-9001"          "js('state/bfl_analysis.json').get('culprit_ids') == ['RT-DBL/RR-9001']"
+check "token chained cloudpms/main <-> hub-sync-api"       "js('state/bfl_analysis.json').get('token_chain') == ['7a7a7a7a-1111-4222-8333-944455550002']"
+check "all 8 bridge-flush gates lit"                       "report.count('- [x] ') == 8 and '- [ ] ' not in report"
+check "fail-fast single-blocker pattern confirmed"         "'Fail-fast pattern CONFIRMED: 2 distinct room rates' in report"
+check "actor + origin captured"                            "'user=ops.lead@demo-hotel.test' in report and 'ORIGIN: 1 platform-side hit' in report"
+case_end
+
+# ---- unknown task name: reported, not silently ignored ---------------------------------
+run_mode unknown-task bogus
+check "unknown task named in the output"                   "\"unknown task 'bogus'\" in log and rc == 0"
+case_end
+
 echo
-if [ $TOTAL_FAIL -eq 0 ]; then echo "RESULT: PASS (all scenarios)"; exit 0; else echo "RESULT: FAIL ($TOTAL_FAIL check(s) failed)"; exit 1; fi
+if [ $TOTAL_FAIL -eq 0 ]; then echo "RESULT: PASS (all scenarios, all modes)"; exit 0; else echo "RESULT: FAIL ($TOTAL_FAIL check(s) failed)"; exit 1; fi
