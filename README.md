@@ -11,6 +11,22 @@ the next run faster.
 ```
 ARRIVAL -> INVENTORY -> ACCEPTANCE -> CM_STORE -> PMS_RECEIVE -> CONVERSION -> DELIVERY
 ```
+```text
+Case: case-001 | Ref: OTA2-1000000001 | Channel: OTA2 -> PMS: CLOUDPMS
+Anchor Window: 2026-01-10T12:04:11Z (+/- 1h) | Join Keys: flowToken=ft-89a1c, hubBookingUuid=hb-4402
+
+Stage Gates:
+  [LIT]     ARRIVAL      (cm-ota2/booking-gateway)
+  [N/A]     INVENTORY    (push channel - skipped per KB)
+  [LIT]     ACCEPTANCE   (HTTP 202 returned)
+  [LIT]     CM_STORE     (cmBookingId=CM-99281)
+  [LIT]     PMS_RECEIVE  (pms-hub/booking-events)
+  [FAILED]  CONVERSION   (ERR_CONVERSION_TAX: Tax breakdown mismatch on room code DLX-K)
+  [N/A]     DELIVERY     (Blocked by terminal conversion fault)
+
+Verdict: BROKEN_AT_CONVERSION (Terminal: true)
+Next Action: Verify tax mapping for room code DLX-K in PMS connector config; trigger replay from CM_STORE once mapped.
+```
 
 ## What it does
 
@@ -154,7 +170,7 @@ same contract, put them on `PATH` (or point the two variables at them) and nothi
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/pms-trace && cd pms-trace
+git clone https://github.com/rodrigoramossanluis-source/pms-trace && cd pms-trace
 mkdir -p ~/pms_tools/kb && cp connector_kb.json ~/pms_tools/kb/
 export S3S_ROOT=ssh://ops@loghost/var/log/archive      # or a local path, or s3://bucket/prefix
 PT_CASE=case-001 PT_REF=OTA2-1000000001 PT_CHANNEL=OTA2 PT_PMS=CLOUDPMS \
