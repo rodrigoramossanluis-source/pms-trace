@@ -1,6 +1,21 @@
-# pms_trace
+# pms-trace
 
-A Bash investigator for hotel reservations that travel **channel (OTA) -> channel manager -> PMS**.
+**Python (>=3.9) pip-installable rewrite** of `pms_trace.sh` — solver-driven channel (OTA) → channel manager → PMS reservation and ARI investigator.
+
+- **Zero external runtime dependencies** by default
+- Optional **OpenSearch** backend: `pip install 'pms-trace[opensearch]'`
+- External self-updating knowledge base (`connector_kb.json`)
+- Install: `pip install .` → console script `pms-trace`
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install .
+pms-trace --version   # pms-trace 0.10.0
+```
+
+---
+
+A log investigator for hotel reservations that travel **channel (OTA) -> channel manager -> PMS**.
 Give it a booking reference and a rough time. It searches the logs of each hop, harvests join keys
 (trace tokens, reservation UUIDs, PMS ids), follows them across the chain and writes a verdict on
 where the booking stopped and why.
@@ -10,22 +25,6 @@ the next run faster.
 
 ```
 ARRIVAL -> INVENTORY -> ACCEPTANCE -> CM_STORE -> PMS_RECEIVE -> CONVERSION -> DELIVERY
-```
-```text
-Case: case-001 | Ref: OTA2-1000000001 | Channel: OTA2 -> PMS: CLOUDPMS
-Anchor Window: 2026-01-10T12:04:11Z (+/- 1h) | Join Keys: flowToken=ft-89a1c, hubBookingUuid=hb-4402
-
-Stage Gates:
-  [LIT]     ARRIVAL      (cm-ota2/booking-gateway)
-  [N/A]     INVENTORY    (push channel - skipped per KB)
-  [LIT]     ACCEPTANCE   (HTTP 202 returned)
-  [LIT]     CM_STORE     (cmBookingId=CM-99281)
-  [LIT]     PMS_RECEIVE  (pms-hub/booking-events)
-  [FAILED]  CONVERSION   (ERR_CONVERSION_TAX: Tax breakdown mismatch on room code DLX-K)
-  [N/A]     DELIVERY     (Blocked by terminal conversion fault)
-
-Verdict: BROKEN_AT_CONVERSION (Terminal: true)
-Next Action: Verify tax mapping for room code DLX-K in PMS connector config; trigger replay from CM_STORE once mapped.
 ```
 
 ## What it does
@@ -170,7 +169,7 @@ same contract, put them on `PATH` (or point the two variables at them) and nothi
 ## Quick start
 
 ```bash
-git clone https://github.com/rodrigoramossanluis-source/pms-trace && cd pms-trace
+git clone https://github.com/<you>/pms-trace && cd pms-trace
 mkdir -p ~/pms_tools/kb && cp connector_kb.json ~/pms_tools/kb/
 export S3S_ROOT=ssh://ops@loghost/var/log/archive      # or a local path, or s3://bucket/prefix
 PT_CASE=case-001 PT_REF=OTA2-1000000001 PT_CHANNEL=OTA2 PT_PMS=CLOUDPMS \
@@ -244,6 +243,55 @@ placeholders**. Map them to your systems in `connector_kb.json`. Gate regexes li
 A KB that has been used on live data accumulates real booking refs and case ids in its `history`
 arrays. So does everything under `runs/`. **Never commit them.** `.gitignore` covers runs and backups.
 Before contributing KB changes upstream, empty the `history` arrays and replace real identifiers.
+
+
+## OpenSearch backend (optional)
+
+The default transport is still the zero-dependency `backends/s3search.py` /
+`s3grep.py` pair (local directory, `ssh://`, or `s3://`).
+
+An **OpenSearch** transport is available as an optional extra. Core stays
+installable with no third-party packages.
+
+```bash
+pip install 'pms-trace[opensearch]'   # pulls opensearch-py
+# or: pip install opensearch-py>=2.4
+```
+
+### Selection
+
+| `PT_BACKEND` | Behaviour |
+|---|---|
+| `auto` (default) | OpenSearch when `OS_URL` is set, otherwise file/S3/SSH |
+| `opensearch` | Force OpenSearch (requires `OS_URL`) |
+| `s3search` / `file` / `s3` / `ssh` | Force the classic backend |
+
+### Configuration
+
+```bash
+export PT_BACKEND=opensearch          # or leave as auto and just set OS_URL
+export OS_URL=https://opensearch.example:9200
+export OS_INDEX_PATTERN='logs-{sys}-{comp}-*'   # placeholders: {sys} {comp} {date} {yyyy} {mm} {dd} {hour}
+export OS_TIME_FIELD=@timestamp
+export OS_MESSAGE_FIELD=message
+export OS_SYS_FIELD=system
+export OS_COMP_FIELD=component
+# auth (pick one)
+export OS_USER=admin
+export OS_PASSWORD=secret
+# or: export OS_API_KEY='...'
+export OS_VERIFY_CERTS=1              # set 0 to disable TLS verify
+```
+
+`list` / `grep` / `query` keep the same safety refusals as the file backend
+(empty pattern, weak numerics, pms-hub full-day). `legacy_find` is not
+supported on OpenSearch and returns a clear error.
+
+## Versioning
+
+Package version has a **single source of truth**: `pms_trace.__version__` in
+`src/pms_trace/__init__.py`. `pyproject.toml` reads it dynamically. Do not
+re-declare the version string in `setup.cfg`, scripts, or other modules.
 
 ## License
 
